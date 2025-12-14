@@ -1,0 +1,205 @@
+:root {
+    /* Base & Text */
+    --text-primary: #EAEAEA; /* Very light gray for text on dark backgrounds */
+    --text-secondary: #B0B0B0; /* Lighter gray for less important text on dark backgrounds */
+    --text-dark: #181919; /* Dark color for text on light backgrounds */
+    --text-muted: #6c757d; /* Muted text for secondary info on light backgrounds */
+
+    /* Backgrounds */
+    --bg-body: #f0f2f5; /* Light gray for the main body */
+    --bg-card: #ffffff; /* White for cards */
+    --bg-overlay-dark: rgba(24, 25, 25, 0.7); /* Dark, semi-transparent for nav/footer */
+    --bg-overlay-light: rgba(255, 255, 255, 0.2);
+    --bg-overlay-blur: 10px; /* Blur effect for overlays */
+
+    /* Interactive & Accent Colors */
+    --accent-primary: #00f2fe; /* The bright cyan color */
+    --accent-primary-hover: #00c1db; /* A slightly darker cyan for hover */
+    --accent-primary-alpha-10: rgba(0, 242, 254, 0.1);
+    --dropdown-item-bg-hover: rgba(0, 0, 0, 0.2); /* Darker background for dropdown items on hover */
+
+    /* Component-specific semantic variables */
+    --nav-bg-color: var(--bg-overlay-dark);
+    --nav-text-color: var(--text-primary);
+    --nav-text-color-hover: var(--accent-primary);
+    --nav-text-color-active: var(--accent-primary);
+
+    --filter-text-color: var(--text-dark);
+    --filter-text-color-hover: var(--accent-primary);
+    --filter-text-color-active: var(--accent-primary);
+    --filter-text-decoration-hover: underline;
+
+    --tag-text-color: var(--text-dark);
+    --tag-text-color-hover: var(--accent-primary);
+    --tag-bg-color-active: var(--accent-primary);
+    --tag-text-color-active: var(--bg-card);
+    --tag-border-color: var(--text-muted);
+
+    --bg-upload-card: rgba(40, 40, 40, 0.65);
+    --border-light-alpha: 1px solid rgba(255, 255, 255, 0.1);
+    --box-shadow-upload: 0 10px 30px rgba(0, 0, 0, 0.2);
+
+    /* Borders */
+    --border-color: var(--gray-300);
+    --border-input-color-dark: #7c6f6f;
+    --border-input-shadow-color: #635e5e;
+
+    /* States */
+    --success-color: #52c41a;
+    --warning-color: #faad14;
+    --error-color: #ff4d4f;
+    --info-color: #1890ff;
+
+    /* Greyscale Palette */
+    --gray-100: #f8f9fa;
+    --gray-200: #e9ecef;
+    --gray-300: #dee2e6;
+    --gray-400: #ced4da;
+    --gray-500: #adb5bd;
+    --gray-600: #6c757d;
+    --gray-700: #495057;
+    --gray-800: #343a40;
+    --gray-900: #212529;
+
+    /* Typography */
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-md: 1.25rem;
+    --font-size-lg: 1.5rem;
+    --font-size-xl: 2rem;
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-bold: 700;
+    --line-height-base: 1.5;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Box Shadow */
+    --box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --box-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.1);
+    --box-shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-dark);
+    background-color: var(--bg-body);
+    margin: 0;
+    overflow-x: hidden;
+}
+
+a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--accent-primary-hover);
+}
+
+.auth-button {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 5px;
+    background: linear-gradient(to right, var(--accent-primary), var(--accent-primary-hover));
+    color: var(--text-primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.auth-button:hover {
+    opacity: 0.9;
+}
+
+/* Utility Classes */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-1 {
+    margin-top: var(--spacing-sm);
+}
+
+.mb-1 {
+    margin-bottom: var(--spacing-sm);
+}
+
+.ml-1 {
+    margin-left: var(--spacing-sm);
+}
+
+.mr-1 {
+    margin-right: var(--spacing-sm);
+}
+
+.p-1 {
+    padding: var(--spacing-sm);
+}
+
+.pt-1 {
+    padding-top: var(--spacing-sm);
+}
+
+.pb-1 {
+    padding-bottom: var(--spacing-sm);
+}
+
+.pl-1 {
+    padding-left: var(--spacing-sm);
+}
+
+.pr-1 {
+    padding-right: var(--spacing-sm);
+}
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
