@@ -6,12 +6,14 @@ import com.exdemix.backend.entity.wallpaper.DeviceType;
 import com.exdemix.backend.entity.wallpaper.Wallpaper;
 import com.exdemix.backend.entity.wallpaper.WallpaperStatus;
 import com.exdemix.backend.util.DatabaseUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class WallpaperDaoImpl implements WallpaperDao {
 
     @Override
@@ -26,7 +28,7 @@ public class WallpaperDaoImpl implements WallpaperDao {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error finding wallpaper by id: {}", id, e);
         }
         return Optional.empty();
     }
@@ -42,65 +44,65 @@ public class WallpaperDaoImpl implements WallpaperDao {
                 wallpapers.add(mapRowToWallpaper(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error finding all wallpapers", e);
         }
         return wallpapers;
     }
 
     @Override
-    public Wallpaper save(Wallpaper entity) {
+    public Wallpaper save(Wallpaper wallpaper) {
         String sql = "INSERT INTO wallpapers (title, description, original_filename, thumbnail_url, medium_url, full_url, watermark_url, price, status, device_type, rating, uploader_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, entity.getTitle());
-            stmt.setString(2, entity.getDescription());
-            stmt.setString(3, entity.getOriginalFilename());
-            stmt.setString(4, entity.getThumbnailUrl());
-            stmt.setString(5, entity.getMediumUrl());
-            stmt.setString(6, entity.getFullUrl());
-            stmt.setString(7, entity.getWatermarkUrl());
-            stmt.setBigDecimal(8, entity.getPrice());
-            stmt.setString(9, entity.getStatus().name());
-            stmt.setString(10, entity.getDeviceType().name());
-            stmt.setString(11, entity.getRating().name());
-            stmt.setLong(12, entity.getUploaderId());
+            stmt.setString(1, wallpaper.getTitle());
+            stmt.setString(2, wallpaper.getDescription());
+            stmt.setString(3, wallpaper.getOriginalFilename());
+            stmt.setString(4, wallpaper.getThumbnailUrl());
+            stmt.setString(5, wallpaper.getMediumUrl());
+            stmt.setString(6, wallpaper.getFullUrl());
+            stmt.setString(7, wallpaper.getWatermarkUrl());
+            stmt.setBigDecimal(8, wallpaper.getPrice());
+            stmt.setString(9, wallpaper.getStatus().name());
+            stmt.setString(10, wallpaper.getDeviceType().name());
+            stmt.setString(11, wallpaper.getRating().name());
+            stmt.setLong(12, wallpaper.getUploaderId());
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        entity.setId(generatedKeys.getLong(1));
+                        wallpaper.setId(generatedKeys.getLong(1));
                     }
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error saving wallpaper: {}", wallpaper, e);
         }
-        return entity;
+        return wallpaper;
     }
 
     @Override
-    public void update(Wallpaper entity) {
+    public void update(Wallpaper wallpaper) {
         String sql = "UPDATE wallpapers SET title = ?, description = ?, original_filename = ?, thumbnail_url = ?, medium_url = ?, full_url = ?, watermark_url = ?, price = ?, status = ?, device_type = ?, rating = ?, uploader_id = ?, reviewer_id = ?, review_date = ?, updated_at = NOW() WHERE id = ?";
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, entity.getTitle());
-            stmt.setString(2, entity.getDescription());
-            stmt.setString(3, entity.getOriginalFilename());
-            stmt.setString(4, entity.getThumbnailUrl());
-            stmt.setString(5, entity.getMediumUrl());
-            stmt.setString(6, entity.getFullUrl());
-            stmt.setString(7, entity.getWatermarkUrl());
-            stmt.setBigDecimal(8, entity.getPrice());
-            stmt.setString(9, entity.getStatus().name());
-            stmt.setString(10, entity.getDeviceType().name());
-            stmt.setString(11, entity.getRating().name());
-            stmt.setLong(12, entity.getUploaderId());
-            stmt.setLong(13, entity.getReviewerId());
-            stmt.setTimestamp(14, entity.getReviewDate() != null ? Timestamp.valueOf(entity.getReviewDate()) : null);
-            stmt.setLong(15, entity.getId());
+            stmt.setString(1, wallpaper.getTitle());
+            stmt.setString(2, wallpaper.getDescription());
+            stmt.setString(3, wallpaper.getOriginalFilename());
+            stmt.setString(4, wallpaper.getThumbnailUrl());
+            stmt.setString(5, wallpaper.getMediumUrl());
+            stmt.setString(6, wallpaper.getFullUrl());
+            stmt.setString(7, wallpaper.getWatermarkUrl());
+            stmt.setBigDecimal(8, wallpaper.getPrice());
+            stmt.setString(9, wallpaper.getStatus().name());
+            stmt.setString(10, wallpaper.getDeviceType().name());
+            stmt.setString(11, wallpaper.getRating().name());
+            stmt.setLong(12, wallpaper.getUploaderId());
+            stmt.setLong(13, wallpaper.getReviewerId());
+            stmt.setTimestamp(14, wallpaper.getReviewDate() != null ? Timestamp.valueOf(wallpaper.getReviewDate()) : null);
+            stmt.setLong(15, wallpaper.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error updating wallpaper: {}", wallpaper, e);
         }
     }
 
@@ -112,7 +114,7 @@ public class WallpaperDaoImpl implements WallpaperDao {
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error deleting wallpaper by id: {}", id, e);
         }
     }
 

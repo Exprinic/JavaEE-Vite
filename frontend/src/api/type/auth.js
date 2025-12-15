@@ -14,7 +14,7 @@ export const authApi = {
     register: (credentials) => {
         return apiClient.post('/auth/register', credentials);
     },
-    fetchVerifyCode: (credentials) => {
-        return apiClient.post('/auth/verifyCode', credentials);
+    fetchCaptcha: (credentials) => {
+        return apiClient.post('/auth/captcha', credentials);
     }
 }

@@ -9,14 +9,23 @@ import java.util.List;
 
 public class WallpaperServiceImpl implements WallpaperService {
     private final WallpaperDao wallpaperDao = new WallpaperDaoImpl();
-
     @Override
-    public List<Wallpaper> list() {
-        return wallpaperDao.findAll();
+    public void upload() {
+
     }
 
     @Override
-    public Wallpaper getById(Long id) {
-        return wallpaperDao.findById(id);
+    public void getDetail() {
+
+    }
+
+    @Override
+    public void download() {
+
+    }
+
+    @Override
+    public void search() {
+
     }
 }

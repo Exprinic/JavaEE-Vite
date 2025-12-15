@@ -1,4 +1,6 @@
-package com.exdemix.backend.entity;// ================= 8. 用户壁纸关系 =================
+package com.exdemix.backend.entity.preference;// ================= 8. 用户壁纸关系 =================
+
+import com.exdemix.backend.entity.stastic.ReviewStatus;
 
 import javax.management.relation.RelationType;
 import java.time.LocalDateTime;

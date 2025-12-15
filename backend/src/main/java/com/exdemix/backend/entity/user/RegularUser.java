@@ -9,9 +9,16 @@ public class RegularUser extends User {
     private BigDecimal balance;          // 账户余额
     private Integer uploadCount;         // 上传数量
     private Integer purchaseCount;       // 购买数量
-    
+
+    public RegularUser() {
+        super();
+        this.userType = UserType.REGULAR;
+    }
+
     @Override
     public boolean hasPermission(Permission permission) {
-        return permission.getLevel() <= PermissionLevel.USER.getLevel();
+        // 基于角色检查权限
+        return getRoles().stream()
+                .anyMatch(role -> role.getPermissions().contains(permission));
     }
 }

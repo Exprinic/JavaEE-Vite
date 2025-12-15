@@ -21,7 +21,7 @@
         <div class="form-group verify-code-group">
           <label for="verifyCode">Verify Code</label>
           <div class="verify-code-input-wrapper">
-            <input type="text" id="verifyCode" v-model="verifyCode" @blur="validateVerifyCode(verifyCode)"
+            <input type="text" id="verifyCode" v-model="captcha" @blur="validateVerifyCode(captcha)"
                    required>
             <button @click.prevent="handleGetCodeClick" class="verify-code-get-button">Get Code</button>
           </div>
@@ -49,21 +49,21 @@ const authStore = useAuthStore()
 const uiStore = useUiStore()
 const errorStore = useErrorStore()
 const {loginDialogVisible} = storeToRefs(uiStore)
-const {login: authLogin, getVerifyCode} = authStore
+const {login: authLogin, getCaptcha} = authStore
 const {hideDialogs, showRegister} = uiStore
 
 const {formatError, validatePhone, validatePassword, validateVerifyCode, isFormValid} = useValidation()
 
 const phone = ref('')
 const password = ref('')
-const verifyCode = ref('')
+const captcha = ref('')
 
 const handleGetCodeClick = () => {
   validatePhone(phone.value)
   validatePassword(password.value)
 
   if (!formatError.value.password && !formatError.value.phone) {
-    getVerifyCode({
+    getCaptcha({
       phone: phone.value,
       password: password.value
     })
@@ -72,7 +72,7 @@ const handleGetCodeClick = () => {
 
 const isLoginDisabled = computed(() => {
   // The form is invalid if the required fields are empty.
-  return !isFormValid.value || phone.value === '' || password.value === '' || verifyCode.value === '';
+  return !isFormValid.value || phone.value === '' || password.value === '' || captcha.value === '';
 });
 
 const login = async () => {
@@ -80,7 +80,7 @@ const login = async () => {
     await authLogin({
       phone: phone.value.trim(),
       password: password.value.trim(),
-      verifyCode: verifyCode.value.trim()
+      verifyCode: captcha.value.trim()
     })
   } catch (error) {
     errorStore.addError(error)

@@ -1,4 +1,4 @@
-package com.exdemix.backend.entity;// ================= 9. 支付记录 =================
+package com.exdemix.backend.entity.stastic;// ================= 9. 支付记录 =================
 
 import com.exdemix.backend.entity.order.PaymentStatus;
 

@@ -1,11 +1,14 @@
 package com.exdemix.backend.service;
 
+import com.exdemix.backend.dto.LoginRequestDTO;
+import com.exdemix.backend.vo.LoginResponseVO;
+
 import java.io.IOException;
 import java.util.Map;
 
 public interface AuthService {
 
-    void login();
+    LoginResponseVO login(LoginRequestDTO loginRequest);
 
     void register();
 

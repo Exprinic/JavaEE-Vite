@@ -11,7 +11,7 @@ import {useWallpaperStore} from './wallpaperStore'; // Import wallpaper store
 
 export const useAuthStore = defineStore('auth', () => {
     const error = ref(null);
-    const verifyCode = ref('');
+    const captcha = ref('');
 
     const isAuthenticated = ref(false);
 
@@ -19,10 +19,10 @@ export const useAuthStore = defineStore('auth', () => {
     const notificationStore = useNotificationStore();
     const userStore = useUserStore();
 
-    async function getVerifyCode(credentials) {
+    async function getCaptcha(credentials) {
         try {
-            const response = await authApi.fetchVerifyCode(credentials);
-            verifyCode.value = response.message;
+            const response = await authApi.fetchCaptcha(credentials);
+            captcha.value = response.data.captcha;
 
             notificationStore.addNotification({message: `Your verify code is: ${response.message}`, type: 'success'});
         } catch (e) {
@@ -88,7 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (e) {
             error.value = e.response?.data?.message || 'Login failed';
             notificationStore.addNotification({message: error.value, type: 'error'});
-            await getVerifyCode(); // Refresh captcha on failed login
+            await getCaptcha(); // Refresh captcha on failed login
             throw e;
         }
     }
@@ -114,7 +114,7 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (e) {
             error.value = e.response?.data?.message || 'Registration failed';
             notificationStore.addNotification({message: error.value, type: 'error'});
-            await getVerifyCode();
+            await getCaptcha();
             throw e;
         }
     }
@@ -143,9 +143,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         error,
-        verifyCode,
+        verifyCode: captcha,
         isAuthenticated,
-        getVerifyCode,
+        getCaptcha,
         login,
         register,
         logout,

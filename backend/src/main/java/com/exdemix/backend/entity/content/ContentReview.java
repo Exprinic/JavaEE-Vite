@@ -1,7 +1,5 @@
 package com.exdemix.backend.entity.content;// ================= 10. 审核系统 =================
 
-import com.exdemix.backend.entity.ReviewDecision;
-
 import java.time.LocalDateTime;
 import java.util.List;
 

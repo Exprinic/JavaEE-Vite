@@ -1,4 +1,4 @@
-package com.exdemix.backend.entity;// ================= 11. 统计实体 =================
+package com.exdemix.backend.entity.stastic;// ================= 11. 统计实体 =================
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
