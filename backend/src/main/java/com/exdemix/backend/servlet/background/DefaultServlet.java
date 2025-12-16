@@ -2,6 +2,7 @@ package com.exdemix.backend.servlet.background;
 
 import com.exdemix.backend.service.BackgroundService;
 import com.exdemix.backend.service.impl.BackgroundServiceImpl;
+import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,9 +15,11 @@ import java.io.IOException;
 public class DefaultServlet extends HttpServlet {
 
     private final BackgroundService backgroundService;
+    private final Gson gson;
 
     public DefaultServlet() {
         this.backgroundService = new BackgroundServiceImpl();
+        this.gson = new Gson();
     }
 
     @Override

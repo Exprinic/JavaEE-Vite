@@ -1,5 +1,6 @@
 package com.exdemix.backend.entity.user;// ================= 1. 用户相关实体 =================
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +12,7 @@ import java.util.Set;
  * 用户实体 - 核心业务实体
  * 采用继承或组合实现角色系统
  */
-@Setter
-@Getter
+@Data
 public abstract class User {
     protected Long id;
     protected String username;          // 用户名（唯一）
@@ -25,6 +25,7 @@ public abstract class User {
     protected UserStatus status;        // 状态：ACTIVE, SUSPENDED, DELETED
     protected LocalDateTime createdAt;
     protected LocalDateTime lastLoginAt;
+    protected LocalDateTime lastLogoutAt;
     protected UserType userType;            // 用户类型：ADMIN, USER
     protected Set<Permission> permissions; // 权限集合
     

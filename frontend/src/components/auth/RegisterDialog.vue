@@ -9,7 +9,8 @@
       <form @submit.prevent="register" autocomplete="off">
         <div class="form-group">
           <label for="username">Username</label>
-          <input type="text" id="username" v-model="username" @blur="validateUsername(username)" required autocomplete="username">
+          <input type="text" id="username" v-model="username" @blur="validateUsername(username)" required
+                 autocomplete="username">
           <span class="error-message" v-if="formatError.username">{{ formatError.username }}</span>
         </div>
         <div class="form-group">
@@ -32,8 +33,9 @@
         <div class="form-group verify-code-group">
           <label for="verify-code">Verify Code</label>
           <div class="verify-code-input-wrapper">
+<!--            点击获取验证码时不会触发验证码格式错误信息-->
             <input type="text" id="verify-code" v-model="captcha"
-                   @blur="validateCaptcha(captcha)" required autocomplete="one-time-code">
+                   @blur="shouldValidateCaptcha ? validateCaptcha(captcha) : null" required autocomplete="one-time-code">
             <button @click.prevent="handleGetCodeClick" class="verify-code-get-button">Get Code</button>
           </div>
           <span class="error-message" v-if="formatError.captcha">{{ formatError.captcha }}</span>
@@ -64,9 +66,9 @@ const {hideDialogs, showLogin} = uiStore
 
 const {
   formatError,
-  validateUsername,
   validatePhone,
   validatePassword,
+  validateUsername,
   validateConfirmPassword,
   validateCaptcha,
   isFormValid
@@ -77,14 +79,27 @@ const phone = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const captcha = ref('')
+const shouldValidateCaptcha = ref(true)
 
 const handleGetCodeClick = async () => {
+  // Temporarily disable captcha validation to prevent "captcha cannot be empty" error
+  shouldValidateCaptcha.value = false
+  
   validateUsername(username.value)
   validatePhone(phone.value)
   validatePassword(password.value)
   validateConfirmPassword(password.value, confirmPassword.value)
 
-  if (!isFormValid()) {
+  const isGetCodeEnabled = !formatError.value.username &&
+                           !formatError.value.phone &&
+                           !formatError.value.password &&
+                           username.value &&
+                           phone.value &&
+                           password.value;
+
+  if (!isGetCodeEnabled) {
+    // Re-enable captcha validation
+    shouldValidateCaptcha.value = true
     return
   }
 
@@ -93,30 +108,30 @@ const handleGetCodeClick = async () => {
       phone: phone.value.trim(),
       password: password.value.trim()
     })
+    // Re-enable captcha validation
+    shouldValidateCaptcha.value = true
   } catch (e) {
+    // Re-enable captcha validation
+    shouldValidateCaptcha.value = true
     errorStore.addError(e)
   }
 }
 
 const isRegisterDisabled = computed(() => {
+  return !isFormValid() || !username.value || !phone.value || !password.value || !confirmPassword.value || !captcha.value
+})
+
+
+const register = async () => {
   // validateUsername(username.value)
   // validatePhone(phone.value)
   // validatePassword(password.value)
   // validateConfirmPassword(password.value, confirmPassword.value)
   // validateCaptcha(captcha.value)
-  return !isFormValid() || !username.value || !phone.value || !password.value || !confirmPassword.value || !captcha.value;
-});
-
-const register = async () => {
-  validateUsername(username.value)
-  validatePhone(phone.value)
-  validatePassword(password.value)
-  validateConfirmPassword(password.value, confirmPassword.value)
-  validateCaptcha(captcha.value)
-
-  if (!isFormValid()) {
-    return
-  }
+  //
+  // if (!isFormValid()) {
+  //   return
+  // }
 
   try {
     await authRegister({
@@ -133,12 +148,14 @@ const switchToLogin = () => {
   console.log('switch to LoginDialog')
   showLogin()
   clearForm()
+  formatError.value = {}
 }
 
 const closeDialogs = () => {
   console.log('close RegisterDialog')
   hideDialogs()
   clearForm()
+  formatError.value = {}
 }
 
 const clearForm = () => {
@@ -147,7 +164,6 @@ const clearForm = () => {
   password.value = ''
   confirmPassword.value = ''
   captcha.value = ''
-  formatError.value = {}
 }
 </script>
 
@@ -268,6 +284,28 @@ input:focus {
   color: var(--accent-primary);
   text-decoration: none;
   font-weight: 500;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background-color: var(--accent-primary);
+  color: var(--bg-card);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-button:hover:not(:disabled) {
+  background-color: var(--accent-primary-hover);
+}
+
+.auth-button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
 }
 
 .error-message {

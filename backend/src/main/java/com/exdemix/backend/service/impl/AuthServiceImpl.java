@@ -5,6 +5,7 @@ import com.exdemix.backend.dao.UserDao;
 import com.exdemix.backend.dao.impl.UserDaoImpl;
 import com.exdemix.backend.dto.CaptchaRequestDTO;
 import com.exdemix.backend.dto.LoginRequestDTO;
+import com.exdemix.backend.dto.LogoutRequestDTO;
 import com.exdemix.backend.dto.RegisterRequestDTO;
 import com.exdemix.backend.entity.user.RegularUser;
 import com.exdemix.backend.entity.user.User;
@@ -13,6 +14,7 @@ import com.exdemix.backend.entity.user.UserType;
 import com.exdemix.backend.service.AuthService;
 import com.exdemix.backend.vo.CaptchaResponseVO;
 import com.exdemix.backend.vo.LoginResponseVO;
+import com.exdemix.backend.vo.LogoutResponseVO;
 import com.exdemix.backend.vo.RegisterResponseVO;
 
 import java.time.LocalDateTime;
@@ -54,9 +56,10 @@ public class AuthServiceImpl implements AuthService {
 
         // 5. 更新最后登录时间
         user.setLastLoginAt(LocalDateTime.now());
+        user.setStatus(UserStatus.ACTIVE);
         userDao.update(user);
 
-        return authConverter.toLoginVO(user, token);
+        return authConverter.toLoginVO(user, token, "Login successful!");
     }
 
     private boolean verifyPassword(String rawPassword, String hashedPassword) {
@@ -83,7 +86,8 @@ public class AuthServiceImpl implements AuthService {
 
         // 3. 创建新用户
         User newUser = new RegularUser();
-        newUser.setUsername(registerRequest.getUsername());
+        newUser.setUsername(registerRequest.getUsername() + " User");
+        newUser.setNickname(registerRequest.getUsername());
         newUser.setPhone(registerRequest.getPhone());
         newUser.setPasswordHash(registerRequest.getPassword()); // 暂时明文
         newUser.setUserType(UserType.REGULAR);
@@ -96,12 +100,27 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userDao.save(newUser);
 
         // 5. 转换为响应 VO
-        return authConverter.toRegisterVO(savedUser, token);
+        return authConverter.toRegisterVO(savedUser, token, "Registration successful!");
     }
 
     @Override
-    public void logout() {
+    public LogoutResponseVO logout(LogoutRequestDTO logoutRequest) {
         // 登出逻辑
+        Optional<User> userOptional = userDao.findByPhone(logoutRequest.getPhone());
+        if (userOptional.isEmpty()) {
+            // 用户不存在时也返回成功，因为可能是重复登出或其他情况
+            return authConverter.toLogoutVO("Logout successful!");
+        }
+
+        User user = userOptional.get();
+
+        // 更新最后登出时间
+        user.setLastLogoutAt(LocalDateTime.now());
+        user.setStatus(UserStatus.SUSPENDED);
+        userDao.update(user);
+
+        // 转换为响应 VO
+        return authConverter.toLogoutVO("Logout successful!");
     }
 
     @Override

@@ -10,19 +10,6 @@
       </router-link>
     </div>
 
-    <div class="header-center">
-      <div class="search-container">
-        <i class="fas fa-search search-icon"></i>
-        <input
-            type="text"
-            class="search-input"
-            placeholder="Search..."
-            v-model="searchQuery"
-            @keyup.enter="performSearch"
-        />
-      </div>
-    </div>
-
     <div class="header-right">
       <nav class="nav-links">
         <router-link to="/explore">Explore</router-link>
@@ -87,15 +74,24 @@ const handleSearchClick = (event) => {
   }
 }
 
+const Logout = async()=>{
+  await authStore.logout({
+    nickname: user.value.nickname,
+    phone: user.value.phone,
+  })
+}
+
+
+
 const handleLogout = () => {
   isDropdownOpen.value = false
-  authStore.logout()
+  Logout()
   uiStore.hideDialogs()
 }
 
 const handleSwitchAccount = () => {
   isDropdownOpen.value = false
-  authStore.logout()
+  Logout()
   setTimeout(() => {
     uiStore.showLogin()
   }, 100)
@@ -263,10 +259,6 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .logo-text {
-    display: none;
-  }
-
-  .header-center {
     display: none;
   }
 

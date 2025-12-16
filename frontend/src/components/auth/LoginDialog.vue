@@ -22,7 +22,7 @@
         <div class="form-group verify-code-group">
           <label for="captcha">Verify Code</label>
           <div class="verify-code-input-wrapper">
-            <input type="text" id="captcha" v-model="captcha" @blur="validateCaptcha(captcha)"
+            <input type="text" id="captcha" v-model="captcha" @blur="shouldValidateCaptcha ? validateCaptcha(captcha) : null"
                    required autocomplete="one-time-code">
             <button @click.prevent="handleGetCodeClick" class="verify-code-get-button">Get Code</button>
           </div>
@@ -58,12 +58,24 @@ const {validatePhone, validatePassword, validateCaptcha, formatError, isFormVali
 const phone = ref('')
 const password = ref('')
 const captcha = ref('')
+const shouldValidateCaptcha = ref(true)
 
 const handleGetCodeClick = async () => {
+  // Temporarily disable captcha validation to prevent "captcha cannot be empty" error
+  shouldValidateCaptcha.value = false
+  
   validatePhone(phone.value)
   validatePassword(password.value)
 
-  if (!isFormValid()) {
+  // Check if phone and password are valid
+  const isGetCodeEnabled = !formatError.value.phone && 
+                          !formatError.value.password && 
+                          phone.value && 
+                          password.value;
+
+  if (!isGetCodeEnabled) {
+    // Re-enable captcha validation
+    shouldValidateCaptcha.value = true
     return
   }
 
@@ -72,7 +84,11 @@ const handleGetCodeClick = async () => {
       phone: phone.value,
       password: password.value
     })
+    // Re-enable captcha validation
+    shouldValidateCaptcha.value = true
   } catch (e) {
+    // Re-enable captcha validation
+    shouldValidateCaptcha.value = true
     errorStore.addError(e)
   }
 }

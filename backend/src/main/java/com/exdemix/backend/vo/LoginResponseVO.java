@@ -15,6 +15,7 @@ public class LoginResponseVO{
     private String username;
     private String nickname;
     private String avatar;
+    private String phone;
 
     private UserType userType;
     private String accessToken;
@@ -22,4 +23,5 @@ public class LoginResponseVO{
     private List<String> roles;
 
     private LocalDateTime loginTime;
+    private String message;
 }

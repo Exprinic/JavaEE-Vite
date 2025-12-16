@@ -12,7 +12,6 @@ export const useUserStore = defineStore('user', () => {
     const cart = ref([]);
 
     const wallpaperStore = useWallpaperStore();
-    const notificationStore = useNotificationStore();
 
     function setUser(userData) {
         user.value = userData;
@@ -27,6 +26,7 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function fetchProfile() {
+        const notificationStore = useNotificationStore();
         try {
             // profile.value = await userApi.fetchProfile();
         } catch (error) {
@@ -35,6 +35,8 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function updateProfile(profileData) {
+        const notificationStore = useNotificationStore();
+
         try {
             await userApi.updateProfile(profileData);
             user.value = {...user.value, ...profileData};
@@ -46,6 +48,8 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function changePassword(passwordData) {
+        const notificationStore = useNotificationStore();
+
         try {
             await userApi.changePassword(passwordData);
             notificationStore.addNotification({message: 'Password changed successfully.', type: 'success'});
@@ -55,6 +59,8 @@ export const useUserStore = defineStore('user', () => {
     }
 
     async function updateUserBackground(wallpaperUrl) {
+        const notificationStore = useNotificationStore();
+
         try {
             await userApi.updateBackground(wallpaperUrl);
             if (user.value) {

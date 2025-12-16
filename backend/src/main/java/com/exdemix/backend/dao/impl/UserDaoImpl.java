@@ -21,12 +21,14 @@ public class UserDaoImpl implements UserDao {
             new RegularUser() {{
                 setId(1L);
                 setPhone("13800000000");
-                setNickname("Test User");
+                setUsername("Test User");
+                setNickname("test");
                 setAvatarUrl("https://example.com/avatar.jpg");
                 setPasswordHash("Test123!");
                 setUserType(UserType.REGULAR);
                 setPermissions(Set.of(Permission.UPLOAD_WALLPAPER));
                 setLastLoginAt(LocalDateTime.now());
+                setLastLogoutAt(LocalDateTime.now());
             }}
     ));
 
@@ -71,8 +73,21 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void update(User entity) {
-        log.info("{} {} has been updated", entity.getLastLoginAt(), entity.getNickname());
+    public void update(User user) {
+        log.info("{} {} has been updated", user.getLastLoginAt(), user.getNickname());
+        for (User existingUser : users){
+            if(existingUser.getId().equals(user.getId())){
+                existingUser.setUsername(user.getUsername());
+                existingUser.setNickname(user.getNickname());
+                existingUser.setAvatarUrl(user.getAvatarUrl());
+                existingUser.setPasswordHash(user.getPasswordHash());
+                existingUser.setUserType(user.getUserType());
+                existingUser.setPermissions(user.getPermissions());
+                existingUser.setLastLoginAt(user.getLastLoginAt());
+                existingUser.setLastLogoutAt(user.getLastLogoutAt());
+                return;
+            }
+        }
     }
 
     @Override

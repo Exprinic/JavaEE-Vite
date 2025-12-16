@@ -21,4 +21,5 @@ public class RegisterResponseVO {
     private UserStatus status;
     private UserType userType;
     private Set<Permission> permissions;
+    private String message;
 }
