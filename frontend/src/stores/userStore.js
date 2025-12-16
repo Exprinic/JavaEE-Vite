@@ -17,18 +17,18 @@ export const useUserStore = defineStore('user', () => {
     function setUser(userData) {
         user.value = userData;
         localStorage.setItem('user', JSON.stringify(userData));
-        wallpaperStore.loadUserWallpaper(getImageUrl(userData.imageUrl));
+        // wallpaperStore.loadUserWallpaper(getImageUrl(userData.imageUrl));
     }
 
     function clearUser() {
-        wallpaperStore.clearActiveWallpaper();
+        // wallpaperStore.clearActiveWallpaper();
         user.value = null;
         localStorage.removeItem('user');
     }
 
     async function fetchProfile() {
         try {
-            profile.value = await userApi.fetchProfile();
+            // profile.value = await userApi.fetchProfile();
         } catch (error) {
             notificationStore.addNotification({message: 'Failed to fetch user profile.', type: 'error'});
         }

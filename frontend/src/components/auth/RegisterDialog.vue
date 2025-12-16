@@ -6,37 +6,37 @@
         <h1 class="logo">EAZ</h1>
         <p class="tagline">ExtraOrdinary Artistic Zone</p>
       </div>
-      <form @submit.prevent="register">
+      <form @submit.prevent="register" autocomplete="off">
         <div class="form-group">
           <label for="username">Username</label>
-          <input type="text" id="username" v-model="username" @blur="validateUsername(username)" required>
+          <input type="text" id="username" v-model="username" @blur="validateUsername(username)" required autocomplete="username">
           <span class="error-message" v-if="formatError.username">{{ formatError.username }}</span>
         </div>
         <div class="form-group">
           <label for="phone">Phone</label>
-          <input type="text" id="phone" v-model="phone" @blur="validatePhone(phone)" required>
+          <input type="text" id="phone" v-model="phone" @blur="validatePhone(phone)" required autocomplete="tel">
           <span class="error-message" v-if="formatError.phone">{{ formatError.phone }}</span>
         </div>
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" v-model="password"
-                 @blur="validatePassword(password)" required>
+                 @blur="validatePassword(password)" required autocomplete="new-password">
           <span class="error-message" v-if="formatError.password">{{ formatError.password }}</span>
         </div>
         <div class="form-group">
           <label for="confirm-password">Confirm Password</label>
           <input type="password" id="confirm-password" v-model="confirmPassword"
-                 @blur="validateConfirmPassword(password, confirmPassword)" required>
+                 @blur="validateConfirmPassword(password, confirmPassword)" required autocomplete="new-password">
           <span class="error-message" v-if="formatError.confirmPassword">{{ formatError.confirmPassword }}</span>
         </div>
         <div class="form-group verify-code-group">
           <label for="verify-code">Verify Code</label>
           <div class="verify-code-input-wrapper">
-            <input type="text" id="verify-code" v-model="verifyCode"
-                   @blur="validateVerifyCode(verifyCode)" required>
+            <input type="text" id="verify-code" v-model="captcha"
+                   @blur="validateCaptcha(captcha)" required autocomplete="one-time-code">
             <button @click.prevent="handleGetCodeClick" class="verify-code-get-button">Get Code</button>
           </div>
-          <span class="error-message" v-if="formatError.verifyCode">{{ formatError.verifyCode }}</span>
+          <span class="error-message" v-if="formatError.captcha">{{ formatError.captcha }}</span>
         </div>
         <button type="submit" class="auth-button" :disabled="isRegisterDisabled">Register</button>
       </form>
@@ -59,7 +59,7 @@ const authStore = useAuthStore()
 const uiStore = useUiStore()
 const errorStore = useErrorStore()
 const {registerDialogVisible} = storeToRefs(uiStore)
-const {register: authRegister, getVerifyCode} = authStore
+const {register: authRegister, getCaptcha} = authStore
 const {hideDialogs, showLogin} = uiStore
 
 const {
@@ -68,7 +68,7 @@ const {
   validatePhone,
   validatePassword,
   validateConfirmPassword,
-  validateVerifyCode,
+  validateCaptcha,
   isFormValid
 } = useValidation()
 
@@ -76,7 +76,7 @@ const username = ref('')
 const phone = ref('')
 const password = ref('')
 const confirmPassword = ref('')
-const verifyCode = ref('')
+const captcha = ref('')
 
 const handleGetCodeClick = async () => {
   validateUsername(username.value)
@@ -84,13 +84,14 @@ const handleGetCodeClick = async () => {
   validatePassword(password.value)
   validateConfirmPassword(password.value, confirmPassword.value)
 
-  if (formatError.value.username || formatError.value.phone || formatError.value.password || formatError.value.confirmPassword) {
+  if (!isFormValid()) {
     return
   }
 
   try {
-    await getVerifyCode({
-      phone: phone.value
+    await getCaptcha({
+      phone: phone.value.trim(),
+      password: password.value.trim()
     })
   } catch (e) {
     errorStore.addError(e)
@@ -98,7 +99,12 @@ const handleGetCodeClick = async () => {
 }
 
 const isRegisterDisabled = computed(() => {
-  return !isFormValid.value || username.value === '' || phone.value === '' || password.value === '' || confirmPassword.value === '' || verifyCode.value === '';
+  // validateUsername(username.value)
+  // validatePhone(phone.value)
+  // validatePassword(password.value)
+  // validateConfirmPassword(password.value, confirmPassword.value)
+  // validateCaptcha(captcha.value)
+  return !isFormValid() || !username.value || !phone.value || !password.value || !confirmPassword.value || !captcha.value;
 });
 
 const register = async () => {
@@ -106,9 +112,9 @@ const register = async () => {
   validatePhone(phone.value)
   validatePassword(password.value)
   validateConfirmPassword(password.value, confirmPassword.value)
-  validateVerifyCode(verifyCode.value)
+  validateCaptcha(captcha.value)
 
-  if (!isFormValid.value) {
+  if (!isFormValid()) {
     return
   }
 
@@ -117,18 +123,20 @@ const register = async () => {
       username: username.value.trim(),
       phone: phone.value.trim(),
       password: password.value.trim(),
-      verifyCode: verifyCode.value.trim()
+      captcha: captcha.value.trim()
     })
   } catch (error) {
     errorStore.addError(error)
   }
 }
 const switchToLogin = () => {
+  console.log('switch to LoginDialog')
   showLogin()
   clearForm()
 }
 
 const closeDialogs = () => {
+  console.log('close RegisterDialog')
   hideDialogs()
   clearForm()
 }
@@ -138,7 +146,7 @@ const clearForm = () => {
   phone.value = ''
   password.value = ''
   confirmPassword.value = ''
-  verifyCode.value = ''
+  captcha.value = ''
   formatError.value = {}
 }
 </script>

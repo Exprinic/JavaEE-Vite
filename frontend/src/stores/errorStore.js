@@ -3,7 +3,7 @@ import {ref} from 'vue';
 import {errorApi} from '../api/type/error.js';
 
 export const useErrorStore = defineStore('error', () => {
-    const errors = ref(null);
+    const errors = ref([]);
 
     async function uploadError(error) {
         try {
@@ -14,7 +14,11 @@ export const useErrorStore = defineStore('error', () => {
     }
 
     function addError(error) {
-        errors.value.push(error);
+        if (errors.value) {
+            errors.value.push(error);
+        } else {
+            errors.value = [error];
+        }
     }
 
     function getError() {

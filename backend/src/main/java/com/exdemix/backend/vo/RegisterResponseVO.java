@@ -1,25 +1,24 @@
 package com.exdemix.backend.vo;
 
 import com.exdemix.backend.entity.user.Permission;
+import com.exdemix.backend.entity.user.UserStatus;
 import com.exdemix.backend.entity.user.UserType;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
-@Data
 @Builder
-public class LoginResponseVO{
-    private Long userId;
+@Data
+public class RegisterResponseVO {
+    private Long id;
     private String username;
     private String nickname;
-    private String avatar;
-
+    private String email;
+    private String phone;
+    private String avatarUrl;
+    private String bio;
+    private UserStatus status;
     private UserType userType;
-    private String accessToken;
     private Set<Permission> permissions;
-    private List<String> roles;
-
-    private LocalDateTime loginTime;
 }

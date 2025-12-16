@@ -1,5 +1,7 @@
 package com.exdemix.backend.entity.wallpaper;// ================= 3. 壁纸相关实体 =================
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -7,6 +9,7 @@ import java.time.LocalDateTime;
  * 壁纸实体
  * 包含完整的生命周期管理
  */
+@Data
 public class Wallpaper {
     private Long id;
     private String title;

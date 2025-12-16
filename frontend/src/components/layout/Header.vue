@@ -33,7 +33,7 @@
         <template v-if="isAuthenticated">
           <div class="user-menu" ref="userMenuRef">
             <button @click="isDropdownOpen = !isDropdownOpen" class="btn user-menu-trigger">
-              <span>Welcome, {{ user.name }}</span>
+              <span>Welcome, {{ user.nickname }}</span>
               <i class="fas fa-chevron-down" style="margin-left: 8px; transition: transform 0.3s;"
                  :style="{ transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }"></i>
             </button>

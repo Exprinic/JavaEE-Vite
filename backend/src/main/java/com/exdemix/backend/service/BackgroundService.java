@@ -1,9 +1,10 @@
 package com.exdemix.backend.service;
 
-import com.exdemix.backend.entity.Background;
-
 import java.util.List;
 
 public interface BackgroundService {
-    List<Background> list();
+    String getDefaultBackground();
+    String getBackground(int id);
+    List<String> getBackgroundHistory();
+    void setBackground(int id);
 }

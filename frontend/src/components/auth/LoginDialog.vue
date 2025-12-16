@@ -6,26 +6,27 @@
         <h1 class="logo">EAZ</h1>
         <p class="tagline">ExtraOrdinary Artistic Zone</p>
       </div>
-      <form @submit.prevent="login">
+      <form @submit.prevent="login" autocomplete="off">
         <!--        Create a form. When this form is submitted, first prevent the browser's default behavior of refreshing the page, and then call the component's internal method named `login` to handle the login logic.-->
         <div class="form-group">
           <label for="phone">Phone</label>
-          <input type="text" id="phone" v-model="phone" @blur="validatePhone(phone)" required>
+          <input type="text" id="phone" v-model="phone" @blur="validatePhone(phone)" required autocomplete="username">
           <span class="error-message" v-if="formatError.phone">{{ formatError.phone }}</span>
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" v-model="password" @blur="validatePassword(password)" required>
+          <input type="password" id="password" v-model="password" @blur="validatePassword(password)" required
+                 autocomplete="current-password">
           <span class="error-message" v-if="formatError.password">{{ formatError.password }}</span>
         </div>
         <div class="form-group verify-code-group">
-          <label for="verifyCode">Verify Code</label>
+          <label for="captcha">Verify Code</label>
           <div class="verify-code-input-wrapper">
-            <input type="text" id="verifyCode" v-model="captcha" @blur="validateVerifyCode(captcha)"
-                   required>
+            <input type="text" id="captcha" v-model="captcha" @blur="validateCaptcha(captcha)"
+                   required autocomplete="one-time-code">
             <button @click.prevent="handleGetCodeClick" class="verify-code-get-button">Get Code</button>
           </div>
-          <span class="error-message" v-if="formatError.verifyCode">{{ formatError.verifyCode }}</span>
+          <span class="error-message" v-if="formatError.captcha">{{ formatError.captcha }}</span>
         </div>
         <button type="submit" class="auth-button" :disabled="isLoginDisabled">Login</button>
       </form>
@@ -52,50 +53,84 @@ const {loginDialogVisible} = storeToRefs(uiStore)
 const {login: authLogin, getCaptcha} = authStore
 const {hideDialogs, showRegister} = uiStore
 
-const {formatError, validatePhone, validatePassword, validateVerifyCode, isFormValid} = useValidation()
+const {validatePhone, validatePassword, validateCaptcha, formatError, isFormValid} = useValidation()
 
 const phone = ref('')
 const password = ref('')
 const captcha = ref('')
 
-const handleGetCodeClick = () => {
+const handleGetCodeClick = async () => {
   validatePhone(phone.value)
   validatePassword(password.value)
 
-  if (!formatError.value.password && !formatError.value.phone) {
-    getCaptcha({
+  if (!isFormValid()) {
+    return
+  }
+
+  try {
+    await getCaptcha({
       phone: phone.value,
       password: password.value
     })
+  } catch (e) {
+    errorStore.addError(e)
   }
 }
 
 const isLoginDisabled = computed(() => {
+  // validatePhone(phone.value)
+  // validatePassword(password.value)
+  // validateCaptcha(captcha.value)
   // The form is invalid if the required fields are empty.
-  return !isFormValid.value || phone.value === '' || password.value === '' || captcha.value === '';
+  return !isFormValid() || !phone.value || !password.value || !captcha.value;
 });
 
 const login = async () => {
+
   try {
     await authLogin({
       phone: phone.value.trim(),
       password: password.value.trim(),
-      verifyCode: captcha.value.trim()
+      captcha: captcha.value.trim()
     })
   } catch (error) {
+    console.error('Login error:', error);
     errorStore.addError(error)
   }
 }
 
 const switchToRegister = () => {
+  console.log('switch to RegisterDialog')
   showRegister()
   formatError.value = {}
+  // Clear form when switching to register
+  clearForm()
 }
 
 const closeDialogs = () => {
+  console.log('close LoginDialog')
   hideDialogs()
   formatError.value = {}
+  // Clear form when closing dialogs
+  clearForm()
 }
+
+
+const clearForm = () => {
+  phone.value = ''
+  password.value = ''
+  captcha.value = ''
+}
+
+// Watch for dialog visibility changes to clear form when opening
+watch(loginDialogVisible, (newVal) => {
+  if (newVal) {
+    // Dialog is opening, ensure form is cleared
+    phone.value = ''
+    password.value = ''
+    captcha.value = ''
+  }
+})
 
 </script>
 
@@ -222,6 +257,28 @@ input:focus {
 .links a:hover {
   background-color: var(--accent-primary-hover);
   transition: background-color 0.5s;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background-color: var(--accent-primary);
+  color: var(--bg-card);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.auth-button:hover:not(:disabled) {
+  background-color: var(--accent-primary-hover);
+}
+
+.auth-button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
 }
 
 .error-message {

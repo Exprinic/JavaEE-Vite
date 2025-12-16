@@ -1,5 +1,7 @@
 package com.exdemix.backend.entity.order;// ================= 6. 订单系统 =================
 
+import com.exdemix.backend.entity.stastic.PaymentRecord;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

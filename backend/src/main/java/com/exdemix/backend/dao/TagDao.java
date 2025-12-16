@@ -1,6 +1,6 @@
 package com.exdemix.backend.dao;
 
-import com.exdemix.backend.entity.old.Tag;
+import com.exdemix.backend.entity.tag.Tag;
 
 import java.util.List;
 

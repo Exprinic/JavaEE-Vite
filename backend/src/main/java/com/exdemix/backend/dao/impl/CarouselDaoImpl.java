@@ -1,11 +1,17 @@
 package com.exdemix.backend.dao.impl;
 
-import com.exdemix.backend.entity.old.Carousel;
+import com.exdemix.backend.dao.CarouselDao;
+import com.exdemix.backend.dao.WallpaperDao;
+import com.exdemix.backend.entity.wallpaper.Wallpaper;
+
+import java.util.List;
 
 public class CarouselDaoImpl implements CarouselDao {
+    private final WallpaperDao wallpaperDao = new WallpaperDaoImpl();
+
     @Override
-    public Carousel findCarousel() {
-        return null;
+    public List<Wallpaper> findAllCarousels() {
+        return wallpaperDao.findAll();
     }
 
     @Override

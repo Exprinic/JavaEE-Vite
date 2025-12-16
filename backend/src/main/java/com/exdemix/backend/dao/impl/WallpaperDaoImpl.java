@@ -51,21 +51,20 @@ public class WallpaperDaoImpl implements WallpaperDao {
 
     @Override
     public Wallpaper save(Wallpaper wallpaper) {
-        String sql = "INSERT INTO wallpapers (title, description, original_filename, thumbnail_url, medium_url, full_url, watermark_url, price, status, device_type, rating, uploader_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO wallpapers (title, description, thumbnail_url, medium_url, full_url, watermark_url, price, status, device_type, uploader_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, wallpaper.getTitle());
             stmt.setString(2, wallpaper.getDescription());
-            stmt.setString(3, wallpaper.getOriginalFilename());
-            stmt.setString(4, wallpaper.getThumbnailUrl());
-            stmt.setString(5, wallpaper.getMediumUrl());
-            stmt.setString(6, wallpaper.getFullUrl());
-            stmt.setString(7, wallpaper.getWatermarkUrl());
-            stmt.setBigDecimal(8, wallpaper.getPrice());
-            stmt.setString(9, wallpaper.getStatus().name());
-            stmt.setString(10, wallpaper.getDeviceType().name());
-            stmt.setString(11, wallpaper.getRating().name());
-            stmt.setLong(12, wallpaper.getUploaderId());
+            stmt.setString(3, wallpaper.getThumbnailUrl());
+            stmt.setString(4, wallpaper.getMediumUrl());
+            stmt.setString(5, wallpaper.getFullUrl());
+            stmt.setString(6, wallpaper.getWatermarkUrl());
+            stmt.setBigDecimal(7, wallpaper.getPrice());
+            stmt.setString(8, wallpaper.getStatus().name());
+            stmt.setString(9, wallpaper.getDeviceType().name());
+            stmt.setString(10, wallpaper.getRating().name());
+            stmt.setLong(11, wallpaper.getUploaderId());
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -82,7 +81,7 @@ public class WallpaperDaoImpl implements WallpaperDao {
 
     @Override
     public void update(Wallpaper wallpaper) {
-        String sql = "UPDATE wallpapers SET title = ?, description = ?, original_filename = ?, thumbnail_url = ?, medium_url = ?, full_url = ?, watermark_url = ?, price = ?, status = ?, device_type = ?, rating = ?, uploader_id = ?, reviewer_id = ?, review_date = ?, updated_at = NOW() WHERE id = ?";
+        String sql = "UPDATE wallpapers SET title = ?, description = ?, thumbnail_url = ?, medium_url = ?, full_url = ?, watermark_url = ?, price = ?, status = ?, device_type = ?, uploader_id = ?, reviewer_id = ?, updated_at = NOW() WHERE id = ?";
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, wallpaper.getTitle());

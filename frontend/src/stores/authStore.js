@@ -22,9 +22,9 @@ export const useAuthStore = defineStore('auth', () => {
     async function getCaptcha(credentials) {
         try {
             const response = await authApi.fetchCaptcha(credentials);
-            captcha.value = response.data.captcha;
+            captcha.value = response.captcha;
 
-            notificationStore.addNotification({message: `Your verify code is: ${response.message}`, type: 'success'});
+            notificationStore.addNotification({message: `Your verify code is: ${response.captcha}`, type: 'success'});
         } catch (e) {
             console.error('Failed to fetch verify code:', e);
             notificationStore.addNotification({message: 'Failed to fetch verify code.', type: 'error'});
@@ -33,49 +33,49 @@ export const useAuthStore = defineStore('auth', () => {
 
     async function login(credentials) {
         // --- Test User Logic (for development and testing) ---
-        if (
-            credentials.phone === '15873259316' &&
-            credentials.password === '123456789User!'
-        ) {
-            console.log('Bypassing login for test user');
-            const testUser = {
-                id: 'test-user',
-                name: 'Test User',
-                phone: '15873259316',
-                password: '123456789User!',
-                role: 'user',
-                imageUrl: './wallpapers/1.jpg'
-            };
-            userStore.setUser(testUser);
-            isAuthenticated.value = true;
-            uiStore.hideDialogs();
-            notificationStore.addNotification({message: 'Login successful!', type: 'success'});
-            await router.push('/');
-            return;
-        }
-
-        // --- Hardcoded Admin Logic (for development and testing) ---
-        if (
-            credentials.phone === '15873259316' &&
-            credentials.password === '123456789Admin!'
-        ) {
-            console.log('Hardcoded admin login successful');
-            const adminUser = {
-                id: '2',
-                name: 'Gabino Slater',
-                phone: '15873259316',
-                password: '123456789Admin!',
-                role: 'admin',
-                imageUrl: './wallpapers/2.jpg'
-            };
-
-            userStore.setUser(adminUser);
-            isAuthenticated.value = true;
-            uiStore.hideDialogs();
-            notificationStore.addNotification({message: 'Login successful!', type: 'success'});
-            await router.push('/');
-            return;
-        }
+        // if (
+        //     credentials.phone === '13800000000' &&
+        //     credentials.password === 'Test123!'
+        // ) {
+        //     console.log('Bypassing login for test user');
+        //     const testUser = {
+        //         id: 'test-user',
+        //         name: 'Test User',
+        //         phone: '13800000000',
+        //         password: 'Test123!',
+        //         role: 'user',
+        //         imageUrl: './wallpapers/1.jpg'
+        //     };
+        //     userStore.setUser(testUser);
+        //     isAuthenticated.value = true;
+        //     uiStore.hideDialogs();
+        //     notificationStore.addNotification({message: 'Login successful!', type: 'success'});
+        //     await router.push('/');
+        //     return;
+        // }
+        //
+        // // --- Hardcoded Admin Logic (for development and testing) ---
+        // if (
+        //     credentials.phone === '13800000000' &&
+        //     credentials.password === 'Test123!'
+        // ) {
+        //     console.log('Hardcoded admin login successful');
+        //     const adminUser = {
+        //         id: '2',
+        //         name: 'Gabino Slater',
+        //         phone: '13800000000',
+        //         password: 'Test123!',
+        //         role: 'admin',
+        //         imageUrl: './wallpapers/2.jpg'
+        //     };
+        //
+        //     userStore.setUser(adminUser);
+        //     isAuthenticated.value = true;
+        //     uiStore.hideDialogs();
+        //     notificationStore.addNotification({message: 'Login successful!', type: 'success'});
+        //     await router.push('/');
+        //     return;
+        // }
 
         // --- API Login Logic ---
         try {
@@ -86,9 +86,11 @@ export const useAuthStore = defineStore('auth', () => {
             notificationStore.addNotification({message: 'Login successful!', type: 'success'});
             await router.push('/');
         } catch (e) {
+            console.error('Login error:', e); // 添加错误日志
+            // 错误消息现在从统一响应格式中获取
             error.value = e.response?.data?.message || 'Login failed';
             notificationStore.addNotification({message: error.value, type: 'error'});
-            await getCaptcha(); // Refresh captcha on failed login
+            // await getCaptcha(); // Refresh captcha on failed login
             throw e;
         }
     }
@@ -96,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
     async function register(credentials) {
         // --- Temporary Registration (for development and testing) ---
         // Set to `true` to enable temporary registration without API call
-        const temporaryRegisterEnabled = true;
+        const temporaryRegisterEnabled = false;
 
         if (temporaryRegisterEnabled) {
             console.log('Using temporary registration');
@@ -114,7 +116,7 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (e) {
             error.value = e.response?.data?.message || 'Registration failed';
             notificationStore.addNotification({message: error.value, type: 'error'});
-            await getCaptcha();
+            // await getCaptcha();
             throw e;
         }
     }
@@ -123,6 +125,9 @@ export const useAuthStore = defineStore('auth', () => {
         userStore.clearUser();
         isAuthenticated.value = false;
         router.push('/');
+        
+        // Also hide any open auth dialogs
+        uiStore.hideDialogs();
     }
 
     function checkAuth() {
@@ -143,7 +148,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     return {
         error,
-        verifyCode: captcha,
+        captcha: captcha,
         isAuthenticated,
         getCaptcha,
         login,

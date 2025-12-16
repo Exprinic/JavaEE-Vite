@@ -6,22 +6,24 @@ export function useValidation() {
         password: '',
         confirmPassword: '',
         phone: '',
-        verifyCode: ''
+        captcha: ''
     })
 
 
     const validatePhone = (phone) => {
+        formatError.value.phone = ''
         const regex = /^1[3456789]\d{9}$/
         if (!phone) {
             formatError.value.phone = 'Phone number cannot be empty.'
         } else if (!regex.test(phone)) {
             formatError.value.phone = 'Please enter a valid phone number.'
         } else {
-            delete formatError.value.phone
+            formatError.value.phone = ''
         }
     }
 
     const validatePassword = (password) => {
+
         const regex = /^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)|(?=.*[a-z])(?=.*[A-Z])(?=.*[^\da-zA-Z])|(?=.*[a-z])(?=.*\d)(?=.*[^\da-zA-Z])|(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z])).{7,}$/
         if (!password) {
             formatError.value.password = 'Password cannot be empty.'
@@ -30,11 +32,12 @@ export function useValidation() {
         } else if (!regex.test(password)) {
             formatError.value.password = 'Password must contain at least three of the following: uppercase letters, lowercase letters, numbers, and special characters.'
         } else {
-            delete formatError.value.password
+            formatError.value.password = ''
         }
     }
 
     const validateUsername = (username) => {
+        formatError.value.username = ''
         const regex = /^[a-zA-Z0-9_.-]+$/
         if (!username) {
             formatError.value.username = 'Username cannot be empty.'
@@ -45,33 +48,36 @@ export function useValidation() {
         } else if (username.includes('..')) {
             formatError.value.username = 'Username cannot contain consecutive dots.'
         } else {
-            delete formatError.value.username
+            formatError.value.username = ''
         }
     }
 
     const validateConfirmPassword = (password, confirmPassword) => {
+        formatError.value.confirmPassword = ''
         if (password !== confirmPassword) {
             formatError.value.confirmPassword = 'The two passwords entered do not match.'
         } else {
-            delete formatError.value.confirmPassword
+            formatError.value.confirmPassword = ''
         }
     }
 
 
     // 验证码必须为六位数字
-    const validateVerifyCode = (verifyCode) => {
+    const validateCaptcha = (captcha) => {
+        formatError.value.captcha = ''
         const regex = /^\d{6}$/
-        if (!verifyCode) {
-            formatError.value.verifyCode = 'Verify code cannot be empty.'
-        } else if (!regex.test(verifyCode)) {
-            formatError.value.verifyCode = 'Verify code must be a 6-digit number.'
+        if (!captcha) {
+            formatError.value.captcha = 'Captcha cannot be empty.'
+        } else if (!regex.test(captcha)) {
+            formatError.value.captcha = 'Captcha must be a 6-digit number.'
         } else {
-            delete formatError.value.verifyCode
+            formatError.value.captcha = ''
         }
     }
 
     const isFormValid = () => {
-        return Object.keys(formatError.value).length === 0
+        // 检查是否所有字段都没有错误信息
+        return Object.values(formatError.value).every(error => error === '')
     }
 
     return {
@@ -80,7 +86,7 @@ export function useValidation() {
         validatePassword,
         validateUsername,
         validateConfirmPassword,
-        validateVerifyCode,
+        validateCaptcha,
         isFormValid
     }
 }

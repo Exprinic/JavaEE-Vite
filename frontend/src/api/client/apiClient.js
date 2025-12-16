@@ -28,7 +28,10 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
     (response) => {
-        // Directly return the data from the response
+        // 提取统一响应格式中的 data 字段
+        if (response.data && response.data.hasOwnProperty('data')) {
+            return response.data.data;
+        }
         return response.data;
     },
     (error) => {

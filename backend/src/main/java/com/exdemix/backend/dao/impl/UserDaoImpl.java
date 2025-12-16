@@ -6,13 +6,30 @@ import com.exdemix.backend.entity.user.RegularUser;
 import com.exdemix.backend.entity.user.User;
 import com.exdemix.backend.entity.user.UserType;
 import com.exdemix.backend.vo.LoginResponseVO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 public class UserDaoImpl implements UserDao {
+    // 临时实现，仅用于测试
+    private final List<User> users = new ArrayList<>(List.of(
+            new RegularUser() {{
+                setId(1L);
+                setPhone("13800000000");
+                setNickname("Test User");
+                setAvatarUrl("https://example.com/avatar.jpg");
+                setPasswordHash("Test123!");
+                setUserType(UserType.REGULAR);
+                setPermissions(Set.of(Permission.UPLOAD_WALLPAPER));
+                setLastLoginAt(LocalDateTime.now());
+            }}
+    ));
+
     @Override
     public Optional<User> findByUsername(String username) {
         return Optional.empty();
@@ -25,28 +42,15 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public Optional<User> findByPhone(String phone) {
-//        return LoginResponseVO.builder()
-//                .userId(user.getId())
-//                .username(user.getPhone())
-//                .nickname(user.getNickname())
-//                .avatar(user.getAvatarUrl())
-//                .userType(user.getUserType())
-//                .accessToken(token)
-//                .permissions(user.getPermissions())
-//                .roles(getRoleNames(user.getRoles())) // 使用新方法
-//                .loginTime(LocalDateTime.now())
-//                .build();
-        // 根据如上返回类型设置一个临时RegularUser 对象，用于测试
-        RegularUser user = new RegularUser();
-        user.setId(1L);
-        user.setPhone(phone);
-        user.setNickname("Test User");
-        user.setAvatarUrl("https://example.com/avatar.jpg");
-        user.setPasswordHash("temporaryPassword");
-        user.setUserType(UserType.REGULAR);
-        user.setPermissions(Set.of(Permission.UPLOAD_WALLPAPER));
-        user.setLastLoginAt(LocalDateTime.now());
-        return Optional.of(user);
+
+        // 临时实现，仅用于测试
+        for(User user : users) {
+            if(user.getPhone().equals(phone)) {
+                log.info("{} {} has been found", user.getCreatedAt(), user.getNickname());
+                return Optional.of(user);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -60,13 +64,15 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User save(User entity) {
-        return null;
+    public User save(User user) {
+        log.info("{} {} has been saved", user.getCreatedAt(), user.getNickname());
+        users.add(user);
+        return user;
     }
 
     @Override
     public void update(User entity) {
-        System.out.println(entity.getLastLoginAt());
+        log.info("{} {} has been updated", entity.getLastLoginAt(), entity.getNickname());
     }
 
     @Override

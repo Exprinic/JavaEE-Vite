@@ -2,13 +2,15 @@ package com.exdemix.backend.converter;
 
 import com.exdemix.backend.entity.user.Role;
 import com.exdemix.backend.entity.user.User;
+import com.exdemix.backend.vo.CaptchaResponseVO;
 import com.exdemix.backend.vo.LoginResponseVO;
+import com.exdemix.backend.vo.RegisterResponseVO;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserConverter {
+public class AuthConverter {
 
     // 通用转换方法 - 支持所有User子类
     public <T extends User> LoginResponseVO toLoginVO(T user, String token) {
@@ -39,5 +41,27 @@ public class UserConverter {
                 .map(user -> toLoginVO(user, null))
                 .collect(Collectors.toList());
     }
-}
 
+    public RegisterResponseVO toRegisterVO(User user, String token) {
+        if (user == null)
+            return null;
+        return RegisterResponseVO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
+                .bio(user.getBio())
+                .status(user.getStatus())
+                .userType(user.getUserType())
+                .permissions(user.getPermissions())
+                .build();
+    }
+
+    public CaptchaResponseVO toCaptchaVO(String captcha) {
+        return CaptchaResponseVO.builder()
+                .captcha(captcha)
+                .build();
+    }
+}

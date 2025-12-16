@@ -23,6 +23,6 @@ public class CarouselWallpaperServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        wallpaperService.getCarousel();
+        carouselService.getCarousels();
     }
 }

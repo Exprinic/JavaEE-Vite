@@ -3,17 +3,25 @@ package com.exdemix.backend.servlet.auth;
 import com.exdemix.backend.dto.LoginRequestDTO;
 import com.exdemix.backend.service.AuthService;
 import com.exdemix.backend.service.impl.AuthServiceImpl;
+import com.exdemix.backend.vo.ApiResponse;
 import com.exdemix.backend.vo.LoginResponseVO;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonSerializer;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @WebServlet("/api/auth/login")
 public class LoginServlet extends HttpServlet {
 
@@ -22,17 +30,20 @@ public class LoginServlet extends HttpServlet {
 
     public LoginServlet() {
         this.authService = new AuthServiceImpl();
-        this.gson = new Gson();
+        // 为Gson注册LocalDateTime类型适配器
+        this.gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) -> 
+                context.serialize(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> 
+                LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+            .create();
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // 从请求中获取参数并封装到DTO对象中
-            LoginRequestDTO loginRequest = new LoginRequestDTO();
-            loginRequest.setPhone(request.getParameter("phone"));
-            loginRequest.setPassword(request.getParameter("password"));
-            loginRequest.setCaptcha(request.getParameter("captcha"));
+            // 从请求体中读取JSON数据
+            LoginRequestDTO loginRequest = new Gson().fromJson(request.getReader(), LoginRequestDTO.class);
 
             // 调用服务层进行登录逻辑处理
             LoginResponseVO loginResponse = authService.login(loginRequest);
@@ -49,11 +60,15 @@ public class LoginServlet extends HttpServlet {
             // 设置 Session 过期时间
             session.setMaxInactiveInterval(30 * 60); // 30分钟
 
+            // 使用统一响应格式
+            ApiResponse<LoginResponseVO> apiResponse = ApiResponse.success(loginResponse);
+
             // 将登录结果写入响应体
             response.setContentType("application/json");
             response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(gson.toJson(loginResponse));
-        } catch (IOException e) {
+            response.getWriter().write(gson.toJson(apiResponse));
+        } catch (Exception e) {
+            log.error("登录失败", e); // 打印异常堆栈以便调试
             HttpSession session = request.getSession(false);
             if (session != null) {
                 session.setAttribute("isLoggedIn", false);
@@ -61,8 +76,10 @@ public class LoginServlet extends HttpServlet {
             }
 
             // 返回错误响应
+            ApiResponse<String> errorResponse = ApiResponse.error(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage() != null ? e.getMessage() : "登录失败");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\":\"登录失败\",\"message\":\""+ e.getMessage() +"\"}");
+            response.getWriter().write(gson.toJson(errorResponse));
         }
     }
+
 }

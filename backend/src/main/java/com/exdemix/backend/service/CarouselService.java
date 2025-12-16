@@ -1,6 +1,6 @@
 package com.exdemix.backend.service;
 
-import com.exdemix.backend.entity.old.Wallpaper;
+import com.exdemix.backend.entity.wallpaper.Wallpaper;
 
 import java.util.List;
 

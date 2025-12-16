@@ -37,4 +37,8 @@ public class OnlineUserStats {
                 Collectors.summingInt(e -> 1)
             ));
     }
+
+    private String getUserRole(Long userId) {
+        return null;
+    }
 }

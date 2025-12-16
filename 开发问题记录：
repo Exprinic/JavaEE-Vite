@@ -1,0 +1,6 @@
+针对useValidation.js中
+formError在loginDialog和registerdialog中的处理
+由于都是直接导入formerror，然后展示其错误信息,所以表明该错误是共用的,需要及时清除,避免展示混乱
+对于isLoginDisabled和isRegisterDisabled,中的两段注释,如果取消注释,则
+:该方法在打开窗口时就会被调用,导致错误信息被展示出来,影响用户使用体验
+
