@@ -1,13 +1,13 @@
 import apiClient from '../client/apiClient.js';
 
 export const wallpaperApi = {
-    getCarouselWallpapers: () => {
+    carouselWallpapers: () => {
         return apiClient.get('/wallpaper/carousel');
     },
     searchWallpapers: (term) => {
         return apiClient.get(`/wallpaper/search?term=${term}`);
     },
-    getRandomWallpaper: () => {
+    randomWallpaper: () => {
         return apiClient.get('/wallpaper/random');
     },
     uploadWallpaper: (formData) => {
@@ -16,5 +16,8 @@ export const wallpaperApi = {
                 'Content-Type': 'multipart/form-data'
             }
         });
-    }
+    },
+    allWallpapers: () => {
+        return apiClient.get('/wallpaper/all');
+    },
 };

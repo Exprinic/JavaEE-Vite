@@ -79,7 +79,7 @@ apiClient.interceptors.response.use(
                 message = "Network connection failure";
         }
         const notificationStore = useNotificationStore();
-        notificationStore.addNotification({message, type: 'error'});
+        notificationStore.addNotification({message: message, type: 'error'});
         return Promise.reject(error)
     }
 )

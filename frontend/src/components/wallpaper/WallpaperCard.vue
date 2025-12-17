@@ -20,11 +20,11 @@
 
 <script setup>
 import {useRouter} from 'vue-router'
-import {useAuthStore} from '../../stores/authStore'
-import {useWallpaperStore} from '../../stores/wallpaperStore'
-import {useNotificationStore} from '../../stores/notificationStore';
-import {getImageUrl} from '../../utils/image.js'
-import {useUiStore} from "../../stores/uiStore.js";
+import {useAuthStore} from '@/stores/authStore.js'
+import {useWallpaperStore} from '@/stores/wallpaperStore.js'
+import {useNotificationStore} from '@/stores/notificationStore.js';
+import {getImageUrl} from '@/utils/image.js'
+import {useUiStore} from "@/stores/uiStore.js";
 import {storeToRefs} from "pinia";
 
 const props = defineProps({

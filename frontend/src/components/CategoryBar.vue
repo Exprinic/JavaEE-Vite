@@ -2,12 +2,12 @@
   <div class="filter-bar-container">
     <div class="filter-buttons">
       <button
-          v-for="filter in filters"
-          :key="filter"
-          :class="{ active: activeFilter === filter }"
-          @click="setFilter(filter)"
+          v-for="category in categorys"
+          :key="category"
+          :class="{ active: activeCategory === category }"
+          @click="setCategory(category)"
       >
-        {{ filter }}
+        {{ category }}
       </button>
     </div>
   </div>
@@ -15,20 +15,20 @@
 
 <script setup>
 defineProps({
-  filters: {
+  categorys: {
     type: Array,
     required: true,
   },
-  activeFilter: {
+  activeCategory: {
     type: String,
     required: true,
   },
 });
 
-const emit = defineEmits(['update:activeFilter']);
+const emit = defineEmits(['update:activeCategory']);
 
-const setFilter = (filter) => {
-  emit('update:activeFilter', filter);
+const setCategory = (category) => {
+  emit('update:activeCategory', category);
 };
 </script>
 

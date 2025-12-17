@@ -36,19 +36,8 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            // 从请求参数中获取手机号，如果没有则从请求体中获取
-            String phone = req.getParameter("phone");
-            
-            LogoutRequestDTO logoutRequest;
-            if (phone != null && !phone.isEmpty()) {
-                // 从查询参数创建请求对象
-                logoutRequest = new LogoutRequestDTO();
-                logoutRequest.setPhone(phone);
-            } else {
-                // 从请求体中读取
-                logoutRequest = gson.fromJson(req.getReader(), LogoutRequestDTO.class);
-            }
-            
+            LogoutRequestDTO logoutRequest = gson.fromJson(req.getReader(), LogoutRequestDTO.class);
+
             LogoutResponseVO logoutResponseVO = authService.logout(logoutRequest);
             ApiResponse<LogoutResponseVO> apiResponse = ApiResponse.success(logoutResponseVO);
 

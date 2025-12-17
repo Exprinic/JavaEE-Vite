@@ -7,12 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class BackgroundServiceImpl implements BackgroundService {
-    
-
-    @Override
-    public String getDefaultBackground() {
-        return "default";
-    }
 
     @Override
     public String getBackground(int id) {

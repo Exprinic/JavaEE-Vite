@@ -1,11 +1,14 @@
 import {defineStore} from 'pinia';
 import {ref, computed, watch} from 'vue';
 import {wallpaperApi} from '../api/type/wallpaper';
+import {useNotificationStore} from "@/stores/notificationStore.js";
 
 export const useWallpaperStore = defineStore('wallpaper', () => {
     // --- STATE ---
     const allWallpapers = ref([]);
     const loading = ref(false);
+    const error = ref(null);
+    const progress = ref(0);
     const searchTerm = ref('');
     const selectedCategory = ref('ALL');
     const selectedTag = ref('ALL');
@@ -29,7 +32,7 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
         return Array.from(tagSet);
     });
 
-    const filteredWallpapers = computed(() => {
+    const selectedWallpapers = computed(() => {
         let wallpapers = allWallpapers.value;
 
         if (selectedCategory.value !== 'ALL') {
@@ -47,8 +50,8 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
     async function fetchAllWallpapers() {
         loading.value = true;
         try {
-            const response = await wallpaperApi.getCarouselWallpapers();
-            allWallpapers.value = response.data;
+            const response = await wallpaperApi.allWallpapers();
+            allWallpapers.value = response.wallpapers;
         } catch (error) {
             console.error('Failed to fetch wallpapers:', error);
         } finally {
@@ -61,7 +64,7 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
         searchTerm.value = term;
         try {
             const response = await wallpaperApi.searchWallpapers(term);
-            allWallpapers.value = response.data;
+            allWallpapers.value = response.wallpapers;
             // After a search, we might want to reset category and tag filters
             selectedCategory.value = 'ALL';
             selectedTag.value = 'ALL';
@@ -80,11 +83,11 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
         selectedTag.value = tag;
     }
 
-    function clearFilters() {
+    async function clearFilters() {
         selectedCategory.value = 'ALL';
         selectedTag.value = 'ALL';
         searchTerm.value = '';
-        fetchAllWallpapers(); // Reload all wallpapers
+        await fetchAllWallpapers(); // Reload all wallpapers
     }
 
     // --- PERSISTENCE ---
@@ -116,7 +119,7 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
 
     async function fetchCarouselWallpapers() {
         try {
-            const response = await wallpaperApi.getCarouselWallpapers();
+            const response = await wallpaperApi.carouselWallpapers();
             // Assuming the carousel uses a subset of all wallpapers
             return response.data.slice(0, 5);
         } catch (error) {
@@ -125,29 +128,45 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
         }
     }
 
-    async function uploadWallpaper(formData) {
+    async function uploadWallpaper(formData){
         loading.value = true;
+        progress.value = 0;
+        const notificationStore = useNotificationStore();
+
         try {
-            await wallpaperApi.uploadWallpaper(formData);
-            // After upload, refresh the wallpaper list
-            await fetchAllWallpapers();
-        } catch (error) {
-            console.error('Failed to upload wallpaper:', error);
-            throw error; // Re-throw to be caught in the component
+            const response = await wallpaperApi.uploadWallpaper(formData, (progressEvent) => {
+                progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            });
+
+            notificationStore.addNotification({message: 'Wallpaper uploaded successfully!', type: 'success'});
+            return response;
+
+        } catch (err) {
+            error.value = err.message || 'An unknown error occurred';
+            notificationStore.addNotification({message: `Upload failed: ${error.value}`, type: 'error'});
+            throw new Error(error.value);
+
         } finally {
             loading.value = false;
         }
-    }
+    };
 
     return {
+        // State
         allWallpapers,
         loading,
+        error,
+        progress,
         searchTerm,
         selectedCategory,
         selectedTag,
+        
+        // Getters
         categories,
         tags,
-        filteredWallpapers,
+        selectedWallpapers,
+        
+        // Actions
         fetchAllWallpapers,
         searchWallpapers,
         setCategory,

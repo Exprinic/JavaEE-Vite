@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
             notificationStore.addNotification({message: captcha.value, type: 'success'});
         } catch (e) {
             console.error('Failed to fetch verify code:', e);
-            notificationStore.addNotification({message: captcha.value || 'Failed to fetch verify code.', type: 'error'});
+            notificationStore.addNotification({message: captcha.value || '获取验证码失败', type: 'error'});
         }
     }
 
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
         } catch (e) {
             console.error('Login error:', e); // 添加错误日志
             // 错误消息现在从统一响应格式中获取
-            error.value = e.response?.data?.message || 'Login failed';
+            error.value = e.response?.data?.message || '登录失败，请稍后再试';
             notificationStore.addNotification({message: error.value, type: 'error'});
             throw e;
         }
@@ -55,15 +55,26 @@ export const useAuthStore = defineStore('auth', () => {
 
         // --- API Registration Logic ---
         try {
-            const userData = await authApi.register(credentials);
+            // 确保所有必需的字段都存在，包括 inviteCode
+            const registerData = {
+                username: credentials.username,
+                phone: credentials.phone,
+                password: credentials.password,
+                captcha: credentials.captcha,
+                inviteCode: credentials.inviteCode || '' // 添加 inviteCode 字段
+            };
+            
+            const userData = await authApi.register(registerData);
             userStore.setUser(userData);
             isAuthenticated.value = true;
             uiStore.hideDialogs();
             notificationStore.addNotification({message: userData.message, type: 'success'});
             await router.push('/login');
         } catch (e) {
-            error.value = e.response?.message;
-            notificationStore.addNotification({message: error.value, type: 'error'});
+            // 提供更具体的错误消息
+            const errorMessage = e.response?.data?.message || '注册失败，请检查输入信息或稍后再试';
+            error.value = errorMessage;
+            notificationStore.addNotification({message: errorMessage, type: 'error'});
             throw e;
         }
     }
@@ -76,14 +87,14 @@ export const useAuthStore = defineStore('auth', () => {
             const response = await authApi.logOut(credentials);
             userStore.clearUser();
             isAuthenticated.value = false;
-            message.value = response.message || 'Logout successful!';
+            message.value = response.message || '登出成功！';
 
             uiStore.hideDialogs();
             notificationStore.addNotification({message: message.value, type: 'success'});
             await router.push('/');
         } catch (e) {
             console.error('Logout error:', e);
-            notificationStore.addNotification({message: message.value || 'Logout failed.', type: 'error'});
+            notificationStore.addNotification({message: message.value || '登出失败，请稍后再试', type: 'error'});
         }
     }
 

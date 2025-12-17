@@ -12,10 +12,10 @@
       </div>
     </div>
     <div class="content-area">
-      <FilterBar
-          :filters="categories"
-          :active-filter="selectedCategory"
-          @update:activeFilter="setCategory"
+      <CategoryBar
+          :categorys="categories"
+          :active-category="selectedCategory"
+          @update:activeCategory="setCategory"
       />
       <TagBar
           :tags="tags"
@@ -30,8 +30,8 @@
 <script setup>
 import {onMounted} from 'vue';
 import {useRoute} from 'vue-router';
-import {useWallpapers} from '../composables/useWallpaper';
-import FilterBar from '../components/FilterBar.vue';
+import {useWallpaperStore} from '../stores/wallpaperStore.js';
+import CategoryBar from '../components/CategoryBar.vue';
 import TagBar from '../components/TagBar.vue';
 import WallpaperGrid from '../components/wallpaper/WallpaperGrid.vue';
 
@@ -47,7 +47,7 @@ const {
   setCategory,
   setTag,
   init
-} = useWallpapers();
+} = useWallpaperStore();
 
 onMounted(() => {
   const query = route.query.q;

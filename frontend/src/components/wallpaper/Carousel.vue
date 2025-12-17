@@ -1,57 +1,77 @@
 <template>
   <div class="carousel-container">
-    <div class="carousel-wrapper" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
-      <div v-for="(image, index) in images" :key="index" class="carousel-slide">
-        <img :src="getImageUrl(image.imageUrl)" :alt="image.name" />
-        <div class="overlay">
-          <div class="image-info">
-            <h3 class="image-name">{{ image.name }}</h3>
-            <p class="image-artist">by {{ image.artist }}</p>
+    <div class="carousel-wrapper">
+      <div class="carousel" ref="carouselRef">
+        <div
+            v-for="(item, index) in displayedItems"
+            :key="index"
+            class="carousel-item"
+            :class="{ active: index === currentIndex }"
+        >
+          <img :src="item.thumbnailUrl" :alt="item.title" class="carousel-image"/>
+          <div class="carousel-caption">
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
           </div>
         </div>
       </div>
+      <button class="carousel-control prev" @click="prevSlide">&#10094;</button>
+      <button class="carousel-control next" @click="nextSlide">&#10095;</button>
     </div>
-    <button class="carousel-control prev" @click="prev">&#10094;</button>
-    <button class="carousel-control next" @click="next">&#10095;</button>
+    <div class="carousel-indicators">
+      <span
+          v-for="(item, index) in displayedItems"
+          :key="index"
+          class="indicator"
+          :class="{ active: index === currentIndex }"
+          @click="goToSlide(index)"
+      ></span>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { getImageUrl } from '../../utils/image.js';
-import { useWallpaperStore } from '../../stores/wallpaperStore';
+import {ref, onMounted, onUnmounted} from 'vue';
+import {useWallpaperStore} from '../../stores/wallpaperStore';
 
 const wallpaperStore = useWallpaperStore();
-const images = ref([]);
+const { fetchCarouselWallpapers } = wallpaperStore;
+
+const carouselRef = ref(null);
 const currentIndex = ref(0);
-let intervalId = null;
+const displayedItems = ref([]);
 
-onMounted(async () => {
-  try {
-    images.value = await wallpaperStore.fetchCarouselWallpapers();
-    startAutoPlay();
-  } catch (error) {
-    console.error('Failed to fetch wallpapers:', error);
-  }
-});
+let intervalId;
 
-const next = () => {
-  currentIndex.value = (currentIndex.value + 1) % images.length;
+const nextSlide = () => {
+  currentIndex.value = (currentIndex.value + 1) % displayedItems.value.length;
 };
 
-const prev = () => {
-  currentIndex.value = (currentIndex.value - 1 + images.length) % images.length;
+const prevSlide = () => {
+  currentIndex.value =
+      (currentIndex.value - 1 + displayedItems.value.length) % displayedItems.value.length;
+};
+
+const goToSlide = (index) => {
+  currentIndex.value = index;
 };
 
 const startAutoPlay = () => {
-  intervalId = setInterval(next, 3000);
+  intervalId = setInterval(() => {
+    nextSlide();
+  }, 5000); // Change slide every 5 seconds
 };
 
 const stopAutoPlay = () => {
-  clearInterval(intervalId);
+  if (intervalId) {
+    clearInterval(intervalId);
+  }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  // Fetch carousel wallpapers from the store
+  const wallpapers = await fetchCarouselWallpapers();
+  displayedItems.value = wallpapers;
   startAutoPlay();
 });
 
@@ -63,112 +83,96 @@ onUnmounted(() => {
 <style scoped>
 .carousel-container {
   position: relative;
-  width: 90%;
-  max-width: 900px;
-  margin: 1rem auto;
-  overflow: hidden;
-  border-radius: 15px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: box-shadow 0.3s ease;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 0;
 }
 
 .carousel-wrapper {
-  display: flex;
-  height: 100%;
-  transition: transform 0.5s ease;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.carousel-slide {
-  flex: 0 0 100%;
+.carousel {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+  min-width: 100%;
   position: relative;
 }
 
-.carousel-slide img {
+.carousel-image {
   width: 100%;
-  height: 100%;
+  height: 500px;
   object-fit: cover;
-  display: block;
 }
 
-.overlay {
+.carousel-caption {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-  color: var(--text-primary);
-  padding: 1.5rem 1rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: white;
+  padding: 2rem;
 }
 
-.carousel-slide:hover .overlay {
-  opacity: 1;
-  transform: translateY(0);
+.carousel-caption h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
 }
 
-.image-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 0.25rem 0;
-}
-
-.image-artist {
-  font-size: 0.8rem;
+.carousel-caption p {
   margin: 0;
-  opacity: 0.8;
+  font-size: 1rem;
 }
 
 .carousel-control {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
   color: white;
   border: none;
-  padding: 0.8rem;
+  padding: 1rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.2rem;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
+}
+
+.carousel-control:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .carousel-control.prev {
-  left: 0.8rem;
+  left: 1rem;
 }
 
 .carousel-control.next {
-  right: 0.8rem;
+  right: 1rem;
 }
 
-@media (min-width: 768px) {
-  .carousel-container {
-    width: 60%;
-  }
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
 
-  .carousel-control {
-    padding: 1rem;
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
-  }
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  margin: 0 0.5rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
 
-  .carousel-control.prev {
-    left: 1rem;
-  }
-
-  .carousel-control.next {
-    right: 1rem;
-  }
+.indicator.active {
+  background: white;
 }
 </style>

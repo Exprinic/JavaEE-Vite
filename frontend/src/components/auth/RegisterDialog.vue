@@ -123,27 +123,21 @@ const isRegisterDisabled = computed(() => {
 
 
 const register = async () => {
-  // validateUsername(username.value)
-  // validatePhone(phone.value)
-  // validatePassword(password.value)
-  // validateConfirmPassword(password.value, confirmPassword.value)
-  // validateCaptcha(captcha.value)
-  //
-  // if (!isFormValid()) {
-  //   return
-  // }
-
   try {
     await authRegister({
       username: username.value.trim(),
       phone: phone.value.trim(),
       password: password.value.trim(),
-      captcha: captcha.value.trim()
+      captcha: captcha.value.trim(),
+      // 添加 inviteCode 字段，即使为空也要发送
+      inviteCode: ''
     })
   } catch (error) {
-    errorStore.addError(error)
+    // 错误信息已经在 authStore 中处理并显示给用户
+    console.error('Registration error:', error)
   }
 }
+
 const switchToLogin = () => {
   console.log('switch to LoginDialog')
   showLogin()

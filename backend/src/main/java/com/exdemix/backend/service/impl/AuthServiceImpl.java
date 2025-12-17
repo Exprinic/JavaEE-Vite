@@ -26,7 +26,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthConverter authConverter;
 
     public AuthServiceImpl() {
-        this.userDao = new UserDaoImpl();
+        this.userDao = new UserDaoImpl(); // 使用基于数据库的实现
         this.authConverter = new AuthConverter();
     }
 
@@ -34,27 +34,27 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseVO login(LoginRequestDTO loginRequest) {
         // 1. 验证验证码
         if (!"123456".equals(loginRequest.getCaptcha())) {
-            throw new RuntimeException("验证码错误");
+            throw new RuntimeException("Captcha is incorrect");
         }
 
         // 2. 根据手机号查找用户
         Optional<User> userOptional = userDao.findByPhone(loginRequest.getPhone());
 
         if (userOptional.isEmpty()) {
-            throw new RuntimeException("用户不存在");
+            throw new RuntimeException("User does not exist");
         }
 
         User user = userOptional.get();
 
         // 3. 验证密码（这里简化处理，实际应使用加密验证）
         if (!verifyPassword(loginRequest.getPassword(), user.getPasswordHash())) {
-            throw new RuntimeException("密码错误");
+            throw new RuntimeException("Password is incorrect");
         }
 
         // 4. 生成访问令牌（这里简化处理）
         String token = generateToken(user);
 
-        // 5. 更新最后登录时间
+        // 5. 更新最后登录时间并将用户状态设为活跃
         user.setLastLoginAt(LocalDateTime.now());
         user.setStatus(UserStatus.ACTIVE);
         userDao.update(user);
@@ -76,31 +76,54 @@ public class AuthServiceImpl implements AuthService {
     public RegisterResponseVO register(RegisterRequestDTO registerRequest) {
         // 1. 验证验证码
         if (!"123456".equals(registerRequest.getCaptcha())) {
-            throw new RuntimeException("验证码错误");
+            throw new RuntimeException("Captcha is incorrect");
         }
 
         // 2. 检查手机号是否已注册
-        if (userDao.findByPhone(registerRequest.getPhone()).isPresent()) {
-            throw new RuntimeException("手机号已被注册");
+        Optional<User> existingUser = userDao.findByPhone(registerRequest.getPhone());
+        if (existingUser.isPresent()) {
+            // 检查用户名是否也被占用
+            Optional<User> userWithSameUsername = userDao.findByUsername(registerRequest.getUsername() + " User");
+            if (userWithSameUsername.isPresent()) {
+                throw new RuntimeException("Phone number and username have been registered, please login directly or use another phone number and username");
+            } else {
+                throw new RuntimeException("Phone number has been registered, please login directly or use another phone number");
+            }
         }
 
-        // 3. 创建新用户
+        // 3. 检查用户名是否已存在
+        if (userDao.findByUsername(registerRequest.getUsername() + " User").isPresent()) {
+            throw new RuntimeException("Username has been occupied, please choose another username");
+        }
+
+        // 4. 创建新用户
         User newUser = new RegularUser();
         newUser.setUsername(registerRequest.getUsername() + " User");
         newUser.setNickname(registerRequest.getUsername());
         newUser.setPhone(registerRequest.getPhone());
+        newUser.setEmail(generateEmail()); // 生成唯一的邮箱
         newUser.setPasswordHash(registerRequest.getPassword()); // 暂时明文
         newUser.setUserType(UserType.REGULAR);
         newUser.setStatus(UserStatus.ACTIVE);
         newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setLastLoginAt(LocalDateTime.now());
 
         String token = generateToken(newUser);
 
-        // 4. 保存用户
+        // 5. 保存用户
         User savedUser = userDao.save(newUser);
 
-        // 5. 转换为响应 VO
+        // 6. 转换为响应 VO
         return authConverter.toRegisterVO(savedUser, token, "Registration successful!");
+    }
+
+    /**
+     * 生成唯一的邮箱地址
+     * @return 唯一的邮箱地址
+     */
+    private String generateEmail() {
+        // 使用当前时间戳生成唯一的邮箱地址
+        return System.currentTimeMillis() + "@example.com";
     }
 
     @Override
