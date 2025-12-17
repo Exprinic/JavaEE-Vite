@@ -3,12 +3,10 @@ package com.exdemix.backend.servlet.auth;
 import com.exdemix.backend.dto.LoginRequestDTO;
 import com.exdemix.backend.service.AuthService;
 import com.exdemix.backend.service.impl.AuthServiceImpl;
+import com.exdemix.backend.util.GsonUtil;
 import com.exdemix.backend.vo.ApiResponse;
 import com.exdemix.backend.vo.LoginResponseVO;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonSerializer;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -31,12 +29,7 @@ public class LoginServlet extends HttpServlet {
     public LoginServlet() {
         this.authService = new AuthServiceImpl();
         // 为Gson注册LocalDateTime类型适配器
-        this.gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) -> 
-                context.serialize(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> 
-                LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-            .create();
+        this.gson = GsonUtil.getGson();
     }
 
     @Override

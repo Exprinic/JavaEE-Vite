@@ -18,9 +18,9 @@ import {useRouter} from 'vue-router';
 const router = useRouter();
 const searchQuery = ref('');
 
-const search = () => {
-  if (searchQuery.value.trim()) {
-    router.push({name: 'explore', query: {q: searchQuery.value.trim()}});
+const search = (query) => {
+  if (query && query.trim()) {
+    router.push({name: 'explore', query: {q: query.trim()}});
   }
 };
 </script>

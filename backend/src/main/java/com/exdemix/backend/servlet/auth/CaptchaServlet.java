@@ -3,6 +3,7 @@ package com.exdemix.backend.servlet.auth;
 import com.exdemix.backend.dto.CaptchaRequestDTO;
 import com.exdemix.backend.service.AuthService;
 import com.exdemix.backend.service.impl.AuthServiceImpl;
+import com.exdemix.backend.util.GsonUtil;
 import com.exdemix.backend.vo.ApiResponse;
 import com.exdemix.backend.vo.CaptchaResponseVO;
 import com.google.gson.Gson;
@@ -30,12 +31,7 @@ public class CaptchaServlet extends HttpServlet {
     public CaptchaServlet() {
         this.authService = new AuthServiceImpl();
         // 为Gson注册LocalDateTime类型适配器
-        this.gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
-                context.serialize(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) ->
-                LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-            .create();
+        this.gson = GsonUtil.getGson();
     }
 
     @Override

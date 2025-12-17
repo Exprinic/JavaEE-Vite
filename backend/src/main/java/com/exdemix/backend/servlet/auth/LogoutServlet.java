@@ -3,6 +3,7 @@ package com.exdemix.backend.servlet.auth;
 import com.exdemix.backend.dto.LogoutRequestDTO;
 import com.exdemix.backend.service.AuthService;
 import com.exdemix.backend.service.impl.AuthServiceImpl;
+import com.exdemix.backend.util.GsonUtil;
 import com.exdemix.backend.vo.ApiResponse;
 import com.exdemix.backend.vo.LogoutResponseVO;
 import com.google.gson.*;
@@ -25,12 +26,7 @@ public class LogoutServlet extends HttpServlet {
 
     public LogoutServlet() {
         this.authService = new AuthServiceImpl();
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
-                        context.serialize(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) ->
-                        LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .create();
+        this.gson = GsonUtil.getGson();
     }
 
     @Override

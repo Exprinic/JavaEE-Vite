@@ -11,7 +11,6 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
     const progress = ref(0);
     const searchTerm = ref('');
     const selectedCategory = ref('ALL');
-    const selectedTag = ref('ALL');
 
     // --- GETTERS ---
     const categories = computed(() => {
@@ -24,70 +23,81 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
         return Array.from(categorySet);
     });
 
-    const tags = computed(() => {
-        const tagSet = new Set(['ALL']);
-        allWallpapers.value.forEach(wallpaper => {
-            wallpaper.tags.forEach(tag => tagSet.add(tag.name));
-        });
-        return Array.from(tagSet);
-    });
-
-    const selectedWallpapers = computed(() => {
-        let wallpapers = allWallpapers.value;
-
-        if (selectedCategory.value !== 'ALL') {
-            wallpapers = wallpapers.filter(w => w.category === selectedCategory.value);
-        }
-
-        if (selectedTag.value !== 'ALL') {
-            wallpapers = wallpapers.filter(w => w.tags.some(t => t.name === selectedTag.value));
-        }
-
-        return wallpapers;
+    const wallpapers = computed(() => {
+        // 直接返回所有壁纸，筛选逻辑已经移到后端
+        return allWallpapers.value;
     });
 
     // --- ACTIONS ---
     async function fetchAllWallpapers() {
         loading.value = true;
+        error.value = null;
         try {
+            console.log('Fetching all wallpapers...');
             const response = await wallpaperApi.allWallpapers();
-            allWallpapers.value = response.wallpapers;
-        } catch (error) {
-            console.error('Failed to fetch wallpapers:', error);
+            console.log('All wallpapers response:', response);
+            // 根据响应结构调整
+            allWallpapers.value = response.wallpapers || response.data || response || [];
+            console.log('Processed wallpapers count:', allWallpapers.value.length);
+        } catch (err) {
+            console.error('Failed to fetch wallpapers:', err);
+            error.value = err.message || 'Failed to fetch wallpapers';
         } finally {
             loading.value = false;
         }
     }
 
-    async function searchWallpapers(term) {
+    async function searchWallpapers(term, category = null) {
         loading.value = true;
-        searchTerm.value = term;
+        error.value = null;
         try {
-            const response = await wallpaperApi.searchWallpapers(term);
-            allWallpapers.value = response.wallpapers;
-            // After a search, we might want to reset category and tag filters
-            selectedCategory.value = 'ALL';
-            selectedTag.value = 'ALL';
-        } catch (error) {
-            console.error(`Failed to search wallpapers with term "${term}":`, error);
+            // 构建搜索参数
+            const searchParams = {};
+            
+            if (term) {
+                searchParams.q = term;
+            }
+            
+            if (category && category !== 'ALL') {
+                searchParams.category = category;
+            }
+            
+            console.log(`Searching wallpapers with params:`, searchParams);
+            const response = await wallpaperApi.searchWallpapers(searchParams);
+            console.log('Search response:', response);
+            allWallpapers.value = response.wallpapers || response.data || response || [];
+            
+            // 更新搜索词和分类状态
+            searchTerm.value = term || '';
+            if (category !== null) {
+                selectedCategory.value = category;
+            }
+        } catch (err) {
+            console.error(`Failed to search wallpapers:`, err);
+            error.value = err.message || 'Failed to search wallpapers';
         } finally {
             loading.value = false;
         }
+    }
+
+    function setSearchTerm(term) {
+        searchTerm.value = term || '';
     }
 
     function setCategory(category) {
         selectedCategory.value = category;
     }
 
-    function setTag(tag) {
-        selectedTag.value = tag;
-    }
-
     async function clearFilters() {
         selectedCategory.value = 'ALL';
-        selectedTag.value = 'ALL';
         searchTerm.value = '';
         await fetchAllWallpapers(); // Reload all wallpapers
+    }
+
+    // 初始化函数
+    async function init() {
+        console.log('Initializing wallpaper store...');
+        await fetchAllWallpapers();
     }
 
     // --- PERSISTENCE ---
@@ -97,19 +107,9 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
         // stored categories with dynamically generated ones.
     }
 
-    const storedTags = localStorage.getItem('wallpaper_tags');
-    if (storedTags) {
-        // similar to categories
-    }
-
     watch(categories, (newCategories) => {
         localStorage.setItem('wallpaper_categories', JSON.stringify(newCategories));
     }, {deep: true});
-
-    watch(tags, (newTags) => {
-        localStorage.setItem('wallpaper_tags', JSON.stringify(newTags));
-    }, {deep: true});
-
 
     function clearCategoriesAndTags() {
         // This function can be expanded if categories/tags are stored directly in the state
@@ -119,9 +119,34 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
 
     async function fetchCarouselWallpapers() {
         try {
+            console.log('Fetching carousel wallpapers...');
             const response = await wallpaperApi.carouselWallpapers();
-            // Return carousel wallpapers from the response
-            return response.data || [];
+            console.log('Raw carousel wallpapers response:', response);
+            
+            // 检查响应数据结构并正确提取壁纸数据
+            let wallpapers = [];
+            if (response && typeof response === 'object') {
+                if (Array.isArray(response)) {
+                    // 直接返回的数组
+                    wallpapers = response;
+                } else if (response.wallpapers && Array.isArray(response.wallpapers)) {
+                    wallpapers = response.wallpapers;
+                } else if (response.data && Array.isArray(response.data)) {
+                    wallpapers = response.data;
+                } else if (response.hasOwnProperty('success')) {
+                    // 处理ApiResponse格式 {success: true, data: [...]}
+                    wallpapers = response.data || [];
+                } else {
+                    // 其他情况
+                    wallpapers = response.wallpapers || response.data || [];
+                }
+            } else if (Array.isArray(response)) {
+                wallpapers = response;
+            }
+            
+            console.log('Processed carousel wallpapers count:', wallpapers.length);
+            console.log('Processed carousel wallpapers:', wallpapers);
+            return wallpapers;
         } catch (error) {
             console.error('Failed to fetch carousel wallpapers:', error);
             return [];
@@ -159,21 +184,20 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
         progress,
         searchTerm,
         selectedCategory,
-        selectedTag,
         
         // Getters
         categories,
-        tags,
-        selectedWallpapers,
+        wallpapers,
         
         // Actions
         fetchAllWallpapers,
         searchWallpapers,
+        setSearchTerm,
         setCategory,
-        setTag,
         clearFilters,
         clearCategoriesAndTags,
         fetchCarouselWallpapers,
         uploadWallpaper,
+        init
     };
 });
