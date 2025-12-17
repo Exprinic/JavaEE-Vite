@@ -27,7 +27,7 @@ public class Wallpaper {
     private BigDecimal price;
     private WallpaperStatus status;      // DRAFT, PENDING_REVIEW, APPROVED, REJECTED, DELETED
     private DeviceType deviceType;       // 枚举：MOBILE, TABLET, DESKTOP, UNIVERSAL
-    private ContentRating rating;        // 内容分级：G, PG, R
+    private ContentRating contentRating;        // 内容分级：G, PG, R
     
     // 统计信息
     private Integer viewCount;

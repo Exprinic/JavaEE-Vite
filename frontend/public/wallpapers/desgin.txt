@@ -1,0 +1,281 @@
+# 图片资源属性数据库
+# 格式：图片名称: [category列表] | [tags列表]
+
+# 背景类图片
+Cloud-City-Cloud-Vortex-Light-and-Shadow:
+  category: background
+  tags: cloud, vortex, light, shadow, sci-fi, black-white, urban, architecture
+
+Twilight-Streetlight-Mountains-Water:
+  category: background
+  tags: twilight, streetlight, mountain, water, dusk, landscape
+
+Seaside-Sunset-House:
+  category: background
+  tags: seaside, sunset, house, rock, palm-tree, dusk, ocean
+
+Snowy-Background-Cute-Penguin-Chick:
+  category: animal
+  tags: penguin, snow, cute, animal, mountain, plush
+
+Gongga-Snow-Mountain-Sunrise-Golden-Mountain:
+  category: background
+  tags: snow-mountain, sunrise, golden, nature, landscape, plateau, lake, reflection
+
+Green-Town-Grass-and-Blue-Sky:
+  category: background
+  tags: town, grass, blue-sky, cloud, green, anime-style, character
+
+Clear-Sky-Forest:
+  category: background
+  tags: forest, clear-sky, summer, tree, trunk, green-leaves, blue-sky
+
+# 动漫类图片
+Giyu-Tomioka-Nichirin-Blade:
+  category: anime\character
+  tags: demon-slayer, anime, character, sword, haori, blue-eyes
+
+Detective-Conan:
+  category: anime\character
+  tags: detective-conan, anime, character, simple, hoodie, light-color
+
+Fresh-and-Classic-anime:
+  category: anime
+  tags: anime, classic, sponge-bob, fresh, grassland, blue-sky
+
+The-bad-guys-balck-and-White-Martial-Arts-Group-Portrait:
+  category: anime\character
+  tags: martial-arts, ink-painting, group-portrait, black-white, straw-hat
+
+Black-and-White-Sexy-Girl-Anime:
+  category: anime\girl
+  tags: anime, girl, black-white, cool, black-clothes
+
+# 人物类图片
+White-haired-Girl-in-Red-Dress:
+  category: girl\anime
+  tags: anime-girl, white-hair, red-dress, back-view, rose, petals
+
+Blue-Sky-and-White-Clouds-vibrant-girl:
+  category: girl\human
+  tags: outdoor, vibrant, fresh, real-people, sportswear, youthful, blue-sky
+
+Zhang-Linghe-Tattoo-Muscle-Bracelet:
+  category: boy\human
+  tags: indoor, male, tattoo, muscle, bracelet, black-tshirt
+
+Fashionable-Outfit-Urban-Beauty:
+  category: girl\human
+  tags: urban, beauty, jeans, red-dress, tulle-skirt, fashion
+
+# 游戏类图片
+CSGO-lightsaber-Counter-Strike-character:
+  category: game\character
+  tags: csgo, counter-strike, lightsaber, tactical, game-character
+
+Chainsaw-Man-Black-and-White-Characters:
+  category: anime\character
+  tags: chainsaw-man, anime, demon, black-white
+
+Mecha-Sci-Fi-Red-laser:
+  category: game\anime
+  tags: mecha, sci-fi, robot, red-laser, fight, cartoon
+
+Xilian-Collapsed-Starry-Sky-Railway-Pink-hair:
+  category: game\anime\girl
+  tags: anime, game-character, pink-hair, star-railway, sky
+
+# 宠物类图片
+Cute-Pets-in-Pictures:
+  category: pet
+  tags: pet, shiba-inu, photography, cute, palm-trees, smile
+
+Black-Cat-Cartoon-Green:
+  category: pet\anime
+  tags: cat, cartoon, black-cat, green, hills, simple
+
+# 桌面壁纸类
+deprecating-bear:
+  category: desktop\anime
+  tags: windows, wallpaper, anime, icon, desktop, bear, blue-background
+
+# 自然景观类
+Evening-background-Dark-Forest:
+  category: background
+  tags: evening, forest, dark, station, track
+
+Winter-Street-Night-Scene-With-Falling-Snowflakes:
+  category: background
+  tags: winter, night, snow, street, snowflake, beautiful
+
+Xinjiang-Sayram-Lake:
+  category: background
+  tags: xinjiang, lake, grassland, blue-sky, snow-mountain, nature
+
+Mount-Fuji-Beautiful-Night-Views:
+  category: background
+  tags: mount-fuji, night, nature, snow-mountain, vehicle
+
+# 续 - 更多图片整理
+
+# 动漫/游戏角色
+Obito-Naruto:
+  category: anime\character
+  tags: naruto, obito, anime
+
+Upper-Moon-One-Kokushibo:
+  category: anime\character
+  tags: demon-slayer, upper-moon, anime, character
+
+Gojo-Satoru-Jujutsu-kaisen:
+  category: anime\character
+  tags: jujutsu-kaisen, gojo-satoru, anime, character
+
+Tanjiro_s-battle-scenes-from-Demon-Slayer:
+  category: anime
+  tags: demon-slayer, tanjiro, battle, action, cartoon
+
+# 女孩/人物类
+Purple-Indoor-High-Heels:
+  category: girl\human
+  tags: indoor, sexy, purple-light, high-heel, sofa, black-clothes
+
+Dark-bedding-late-night-tablet:
+  category: girl\human
+  tags: indoor, bedding, night, simple, beauty, dark, tablet
+
+Dark-Sexy-and-Alluring:
+  category: girl\human
+  tags: sexy, dark, elegant, light-shadow, bodysuit, charming
+
+Black-Haired-Girl-Newspaper-Wall:
+  category: girl\anime
+  tags: anime-girl, black-hair, newspaper, illustration
+
+# 动物/宠物类
+Cute-Cat-Bed-Plush-Toy-Cat:
+  category: pet\anime
+  tags: cat, cute, bed, plush, anime-pattern
+
+anime-Rabbit-Cute-Animal:
+  category: anime\animal
+  tags: rabbit, anime, animal, colorful, illustration, childish
+
+# 影视类
+Director-Qi-The-name-of-People:
+  category: tv\character
+  tags: tv-drama, character, director
+
+TV-series-Stills:
+  category: tv
+  tags: tv-series, friends, group-portrait, outdoor, stills
+
+# 风景类
+Chairman-Mao-Statue-Xiangjiang-river-at-dusk:
+  category: background\historical
+  tags: statue, river, dusk, landscape, orange-isle, vessel
+
+Mountain-Sea-Clouds:
+  category: background
+  tags: mountain, sea, cloud, landscape
+
+Colorful-sky-Forest-Water:
+  category: background
+  tags: forest, colorful-sky, water, landscape
+
+# 续 - 更多风景和场景类
+
+# 自然景观
+mountain-clouds-forest:
+  category: background
+  tags: mountain, cloud, forest, nature
+
+Moon-Wolf-Blue-Sky-Night:
+  category: background
+  tags: moon, wolf, night, mountain, blue-sky
+
+Butterfly-Mushroom-Forest:
+  category: background\animal
+  tags: forest, mushroom, butterfly, nature
+
+# 女孩与场景结合
+Sunny-Sky-Girl-Flower:
+  category: girl\anime\background
+  tags: girl, sunny, flower, sky, anime
+
+Lake-Sunset-Girl-Cloud:
+  category: girl\anime\background
+  tags: girl, lake, sunset, cloud, anime
+
+Girl-Lake-Ice-gate-Blue-sky:
+  category: girl\anime\background
+  tags: girl, lake, ice, gate, blue-sky, anime
+
+Girl-Destroyed-city-Sky:
+  category: girl\anime\background
+  tags: girl, destroyed-city, sky, anime
+
+Girl-Forest-Lake-Walking:
+  category: girl\anime\background
+  tags: girl, forest, lake, walking, anime
+
+Lake-Girl-City:
+  category: girl\anime\background
+  tags: girl, city, lake, anime
+
+Girl-City-Night-Cloud-Sky:
+  category: girl\background
+  tags: girl, city, night, cloud, sky
+
+# 简单分类
+Blue-Girl:
+  category: girl\anime
+  tags: girl, anime
+
+Girl-$(1-15)-Painting:
+  category: girl\anime
+  tags: girl, painting, anime
+
+# 游戏相关
+Fate-Enco-Kesate:
+  category: girl\anime\game
+  tags: girl, anime, game, sky
+
+girl-dancing-water:
+  category: game\anime\girl
+  tags: genshin-impact, anime-girl, water, dance
+
+blue-sky-with-music:
+  category: game\background
+  tags: star-rail, city, building, sky, music
+
+# 其他
+Snow-capped-Mountain-Convenience-Store-Starbucks:
+  category: background
+  tags: mountain, starbucks, convenience-store, night, snow
+
+No-Pointing-or-Gestures:
+  category: background
+  tags: safety, warning, sign, yellow-background, character
+
+CS2-Game-Black-Graffiti-Counter-Strike:
+  category: game
+  tags: counter-strike, cs2, graffiti, black-background
+
+White-Haired-Red-Eyed-Character-Dark-Background:
+  category: anime\character
+  tags: anime, white-hair, red-eyes, dark-background
+
+colorful-sky-girl-next-to-tree:
+  category: background\anime
+  tags: colorful-sky, girl, tree, lake, anime
+
+colorful-sky-city:
+  category: anime\background
+  tags: colorful-sky, city, building, anime
+
+lake-piano-girl-flower-blue-sky:
+  category: girl\anime
+  tags: lake, piano, girl, flower, blue-sky, anime
+
+

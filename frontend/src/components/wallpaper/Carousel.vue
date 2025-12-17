@@ -8,7 +8,7 @@
             class="carousel-item"
             :class="{ active: index === currentIndex }"
         >
-          <img :src="item.thumbnailUrl" :alt="item.title" class="carousel-image"/>
+          <img :src="getWallpaperImageUrl(item)" :alt="item.title" class="carousel-image"/>
           <div class="carousel-caption">
             <h3>{{ item.title }}</h3>
             <p>{{ item.description }}</p>
@@ -66,6 +66,12 @@ const stopAutoPlay = () => {
   if (intervalId) {
     clearInterval(intervalId);
   }
+};
+
+// 获取壁纸图片URL的函数
+const getWallpaperImageUrl = (wallpaper) => {
+  // 优先使用fullUrl，其次是mediumUrl，最后是thumbnailUrl
+  return wallpaper.fullUrl || wallpaper.mediumUrl || wallpaper.thumbnailUrl || '/wallpapers/default.jpg';
 };
 
 onMounted(async () => {

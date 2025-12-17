@@ -120,8 +120,8 @@ export const useWallpaperStore = defineStore('wallpaper', () => {
     async function fetchCarouselWallpapers() {
         try {
             const response = await wallpaperApi.carouselWallpapers();
-            // Assuming the carousel uses a subset of all wallpapers
-            return response.data.slice(0, 5);
+            // Return carousel wallpapers from the response
+            return response.data || [];
         } catch (error) {
             console.error('Failed to fetch carousel wallpapers:', error);
             return [];

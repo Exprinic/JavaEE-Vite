@@ -12,6 +12,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 public class WallpaperDaoImpl implements WallpaperDao {
@@ -51,20 +52,25 @@ public class WallpaperDaoImpl implements WallpaperDao {
 
     @Override
     public Wallpaper save(Wallpaper wallpaper) {
-        String sql = "INSERT INTO wallpapers (title, description, thumbnail_url, medium_url, full_url, watermark_url, price, status, device_type, uploader_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO wallpapers (uuid, title, description, thumbnail_url, medium_url, full_url, watermark_url, price, status, device_type, content_rating, uploader_id, created_at, updated_at, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, wallpaper.getTitle());
-            stmt.setString(2, wallpaper.getDescription());
-            stmt.setString(3, wallpaper.getThumbnailUrl());
-            stmt.setString(4, wallpaper.getMediumUrl());
-            stmt.setString(5, wallpaper.getFullUrl());
-            stmt.setString(6, wallpaper.getWatermarkUrl());
-            stmt.setBigDecimal(7, wallpaper.getPrice());
-            stmt.setString(8, wallpaper.getStatus().name());
-            stmt.setString(9, wallpaper.getDeviceType().name());
-            stmt.setString(10, wallpaper.getRating().name());
-            stmt.setLong(11, wallpaper.getUploaderId());
+            stmt.setString(1, UUID.randomUUID().toString()); // 生成UUID
+            stmt.setString(2, wallpaper.getTitle());
+            stmt.setString(3, wallpaper.getDescription());
+            stmt.setString(4, wallpaper.getThumbnailUrl());
+            stmt.setString(5, wallpaper.getMediumUrl());
+            stmt.setString(6, wallpaper.getFullUrl());
+            stmt.setString(7, wallpaper.getWatermarkUrl());
+            stmt.setBigDecimal(8, wallpaper.getPrice());
+            stmt.setString(9, wallpaper.getStatus().name());
+            stmt.setString(10, wallpaper.getDeviceType().name());
+            stmt.setString(11, wallpaper.getContentRating().name());
+            stmt.setLong(12, wallpaper.getUploaderId());
+            stmt.setTimestamp(13, Timestamp.valueOf(wallpaper.getCreatedAt()));
+            stmt.setTimestamp(14, Timestamp.valueOf(wallpaper.getUpdatedAt()));
+            stmt.setTimestamp(15, Timestamp.valueOf(wallpaper.getPublishedAt()));
+            
             int affectedRows = stmt.executeUpdate();
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -81,24 +87,22 @@ public class WallpaperDaoImpl implements WallpaperDao {
 
     @Override
     public void update(Wallpaper wallpaper) {
-        String sql = "UPDATE wallpapers SET title = ?, description = ?, thumbnail_url = ?, medium_url = ?, full_url = ?, watermark_url = ?, price = ?, status = ?, device_type = ?, uploader_id = ?, reviewer_id = ?, updated_at = NOW() WHERE id = ?";
+        String sql = "UPDATE wallpapers SET title = ?, description = ?, thumbnail_url = ?, medium_url = ?, full_url = ?, watermark_url = ?, price = ?, status = ?, device_type = ?, content_rating = ?, uploader_id = ?, updated_at = ? WHERE id = ?";
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, wallpaper.getTitle());
             stmt.setString(2, wallpaper.getDescription());
-            stmt.setString(3, wallpaper.getOriginalFilename());
-            stmt.setString(4, wallpaper.getThumbnailUrl());
-            stmt.setString(5, wallpaper.getMediumUrl());
-            stmt.setString(6, wallpaper.getFullUrl());
-            stmt.setString(7, wallpaper.getWatermarkUrl());
-            stmt.setBigDecimal(8, wallpaper.getPrice());
-            stmt.setString(9, wallpaper.getStatus().name());
-            stmt.setString(10, wallpaper.getDeviceType().name());
-            stmt.setString(11, wallpaper.getRating().name());
-            stmt.setLong(12, wallpaper.getUploaderId());
-            stmt.setLong(13, wallpaper.getReviewerId());
-            stmt.setTimestamp(14, wallpaper.getReviewDate() != null ? Timestamp.valueOf(wallpaper.getReviewDate()) : null);
-            stmt.setLong(15, wallpaper.getId());
+            stmt.setString(3, wallpaper.getThumbnailUrl());
+            stmt.setString(4, wallpaper.getMediumUrl());
+            stmt.setString(5, wallpaper.getFullUrl());
+            stmt.setString(6, wallpaper.getWatermarkUrl());
+            stmt.setBigDecimal(7, wallpaper.getPrice());
+            stmt.setString(8, wallpaper.getStatus().name());
+            stmt.setString(9, wallpaper.getDeviceType().name());
+            stmt.setString(10, wallpaper.getContentRating().name());
+            stmt.setLong(11, wallpaper.getUploaderId());
+            stmt.setTimestamp(12, Timestamp.valueOf(wallpaper.getUpdatedAt()));
+            stmt.setLong(13, wallpaper.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             log.error("Error updating wallpaper: {}", wallpaper, e);
@@ -119,14 +123,38 @@ public class WallpaperDaoImpl implements WallpaperDao {
 
     @Override
     public List<Wallpaper> findByStatus(WallpaperStatus status) {
-        // Implementation for findByStatus
-        return new ArrayList<>();
+        List<Wallpaper> wallpapers = new ArrayList<>();
+        String sql = "SELECT * FROM wallpapers WHERE status = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status.name());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    wallpapers.add(mapRowToWallpaper(rs));
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error finding wallpapers by status: {}", status, e);
+        }
+        return wallpapers;
     }
 
     @Override
     public List<Wallpaper> findByUploaderId(Long uploaderId) {
-        // Implementation for findByUploaderId
-        return new ArrayList<>();
+        List<Wallpaper> wallpapers = new ArrayList<>();
+        String sql = "SELECT * FROM wallpapers WHERE uploader_id = ?";
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, uploaderId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    wallpapers.add(mapRowToWallpaper(rs));
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error finding wallpapers by uploader id: {}", uploaderId, e);
+        }
+        return wallpapers;
     }
 
     private Wallpaper mapRowToWallpaper(ResultSet rs) throws SQLException {
@@ -134,7 +162,6 @@ public class WallpaperDaoImpl implements WallpaperDao {
         wallpaper.setId(rs.getLong("id"));
         wallpaper.setTitle(rs.getString("title"));
         wallpaper.setDescription(rs.getString("description"));
-        wallpaper.setOriginalFilename(rs.getString("original_filename"));
         // ImageMetadata would be a JSON or separate columns, assuming JSON for now
         // wallpaper.setMetadata(...);
         wallpaper.setThumbnailUrl(rs.getString("thumbnail_url"));
@@ -144,14 +171,15 @@ public class WallpaperDaoImpl implements WallpaperDao {
         wallpaper.setPrice(rs.getBigDecimal("price"));
         wallpaper.setStatus(WallpaperStatus.valueOf(rs.getString("status")));
         wallpaper.setDeviceType(DeviceType.valueOf(rs.getString("device_type")));
-        wallpaper.setRating(ContentRating.valueOf(rs.getString("rating")));
+        wallpaper.setContentRating(ContentRating.valueOf(rs.getString("content_rating")));
         wallpaper.setViewCount(rs.getInt("view_count"));
         wallpaper.setDownloadCount(rs.getInt("download_count"));
         wallpaper.setPurchaseCount(rs.getInt("purchase_count"));
         wallpaper.setUploaderId(rs.getLong("uploader_id"));
         wallpaper.setReviewerId(rs.getLong("reviewer_id"));
-        if (rs.getTimestamp("review_date") != null) {
-            wallpaper.setReviewDate(rs.getTimestamp("review_date").toLocalDateTime());
+        // 数据库中字段名为reviewed_at而非review_date
+        if (rs.getTimestamp("reviewed_at") != null) {
+            wallpaper.setReviewDate(rs.getTimestamp("reviewed_at").toLocalDateTime());
         }
         if (rs.getTimestamp("created_at") != null) {
             wallpaper.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
