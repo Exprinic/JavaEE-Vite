@@ -6,7 +6,6 @@ import { useWallpaperStore } from './wallpaperStore'; // 导入壁纸存储
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(!!localStorage.getItem('token'))
-  const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
   const loading = ref(false)
   const error = ref(null)
 
@@ -17,16 +16,19 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await authApi.login(credentials)
       
-      if (response.token && response.user) {
-        localStorage.setItem('token', response.token)
-        localStorage.setItem('user', JSON.stringify(response.user))
-        
+      if (response && response.accessToken) {
+        localStorage.setItem('user', JSON.stringify(response.userInfo));
+        localStorage.setItem('accessToken', response.accessToken)
+        localStorage.setItem('refreshToken', response.refreshToken);
+        localStorage.setItem('token', response.accessToken)
+
         isAuthenticated.value = true
-        user.value = response.user
-        
+
+        const userInfo = response.userInfo
+        user.value = userInfo
         const notificationStore = useNotificationStore();
         notificationStore.addNotification({ 
-          message: `Welcome back, ${response.user.username}!`, 
+          message: `Welcome back, ${userInfo.nickname || userInfo.username}!`, 
           type: 'success' 
         })
         
@@ -117,6 +119,35 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+    async function getCaptcha(credentials) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await authApi.fetchCaptcha(credentials)
+      
+      const notificationStore = useNotificationStore();
+      notificationStore.addNotification({ 
+        message: response.captcha,
+        type: 'success' 
+      })
+
+    } catch (err) {
+      console.error('Failed to fetch captcha:', err)
+      error.value = err.message || 'Failed to fetch captcha'
+      
+      const notificationStore = useNotificationStore();
+      notificationStore.addNotification({ 
+        message: error.value, 
+        type: 'error' 
+      })
+      
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     isAuthenticated,
     user,
@@ -126,6 +157,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
-    checkAuth
+    checkAuth,
+    getCaptcha
   }
 })

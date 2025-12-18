@@ -50,7 +50,7 @@ const authStore = useAuthStore()
 const uiStore = useUiStore()
 const errorStore = useErrorStore()
 const {loginDialogVisible} = storeToRefs(uiStore)
-const {login: authLogin, getCaptcha} = authStore
+const {login: authLogin, getCaptcha: authGetCaptcha} = authStore
 const {hideDialogs, showRegister} = uiStore
 
 const {validatePhone, validatePassword, validateCaptcha, formatError, isFormValid} = useValidation()
@@ -80,7 +80,7 @@ const handleGetCodeClick = async () => {
   }
 
   try {
-    await getCaptcha({
+    await authGetCaptcha({
       phone: phone.value,
       password: password.value
     })

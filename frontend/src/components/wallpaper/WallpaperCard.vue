@@ -10,7 +10,7 @@
     <div class="overlay">
       <div class="wallpaper-info">
         <h3 class="wallpaper-name">{{ wallpaper.title }}</h3>
-        <p class="wallpaper-artist">by Unknown</p>
+        <p class="wallpaper-artist">by {{ wallpaper.artist || 'Unknown' }}</p>
       </div>
       <div class="card-actions">
         <button class="action-button" @click.stop="setAsWallpaper">

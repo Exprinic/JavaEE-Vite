@@ -5,11 +5,14 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * 注册请求 DTO
+ */
 @Data
 public class RegisterRequestDTO {
     @NotBlank(message = "用户名不能为空")
     @Pattern(regexp = "^[a-zA-Z0-9_-]{4,16}$", message = "用户名格式错误，只能包含字母、数字、下划线和短横线，长度为4-16个字符")
-    private String username;
+    private String nickname;
     @NotBlank(message = "手机号不能为空")
     @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式错误")
     private String phone;

@@ -52,14 +52,14 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 4. 生成访问令牌（这里简化处理）
-        String token = generateToken(user);
+        String token = generateAccessToken(user);
 
         // 5. 更新最后登录时间并将用户状态设为活跃
         user.setLastLoginAt(LocalDateTime.now());
         user.setStatus(UserStatus.ACTIVE);
         userDao.update(user);
 
-        return authConverter.toLoginVO(user, token, "Login successful!");
+        return authConverter.toLoginVO(user, token, "refresh_token", "Login successful!");
     }
 
     private boolean verifyPassword(String rawPassword, String hashedPassword) {
@@ -67,10 +67,16 @@ public class AuthServiceImpl implements AuthService {
         return rawPassword.equals(hashedPassword); // 简化示例
     }
 
-    private String generateToken(User user) {
+    private String generateAccessToken(User user) {
         // 实际应生成 JWT token
         return "generated_token_for_user_" + user.getId(); // 简化示例
     }
+    private String generateRefreshToken(User user) {
+        // 实际应生成 JWT token
+        return "generated_refresh_token_for_user_" + user.getId(); // 简化示例
+    }
+
+    
 
     @Override
     public RegisterResponseVO register(RegisterRequestDTO registerRequest) {
@@ -83,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
         Optional<User> existingUser = userDao.findByPhone(registerRequest.getPhone());
         if (existingUser.isPresent()) {
             // 检查用户名是否也被占用
-            Optional<User> userWithSameUsername = userDao.findByUsername(registerRequest.getUsername() + " User");
+            Optional<User> userWithSameUsername = userDao.findByUsername(registerRequest.getNickname() + " User");
             if (userWithSameUsername.isPresent()) {
                 throw new RuntimeException("Phone number and username have been registered, please login directly or use another phone number and username");
             } else {
@@ -92,14 +98,14 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 3. 检查用户名是否已存在
-        if (userDao.findByUsername(registerRequest.getUsername() + " User").isPresent()) {
+        if (userDao.findByUsername(registerRequest.getNickname() + " User").isPresent()) {
             throw new RuntimeException("Username has been occupied, please choose another username");
         }
 
         // 4. 创建新用户
         User newUser = new RegularUser();
-        newUser.setUsername(registerRequest.getUsername() + " User");
-        newUser.setNickname(registerRequest.getUsername());
+        newUser.setUsername(registerRequest.getNickname() + " User");
+        newUser.setNickname(registerRequest.getNickname());
         newUser.setPhone(registerRequest.getPhone());
         newUser.setEmail(generateEmail()); // 生成唯一的邮箱
         newUser.setPasswordHash(registerRequest.getPassword()); // 暂时明文
@@ -108,13 +114,14 @@ public class AuthServiceImpl implements AuthService {
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setLastLoginAt(LocalDateTime.now());
 
-        String token = generateToken(newUser);
+        String accessToken = generateAccessToken(newUser);
+        String refreshToken = generateRefreshToken(newUser);
 
         // 5. 保存用户
         User savedUser = userDao.save(newUser);
 
         // 6. 转换为响应 VO
-        return authConverter.toRegisterVO(savedUser, token, "Registration successful!");
+        return authConverter.toRegisterVO(savedUser, accessToken, refreshToken, "Registration successful!");
     }
 
     /**

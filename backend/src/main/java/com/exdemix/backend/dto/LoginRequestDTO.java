@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
+/**
+ * 登录请求 DTO
+ */
 @Data
 public class LoginRequestDTO {
     @NotBlank(message = "手机号不能为空")

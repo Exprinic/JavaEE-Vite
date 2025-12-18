@@ -17,7 +17,7 @@
           <img :src="getWallpaperImageUrl(item)" :alt="item.title" class="carousel-image"/>
           <div class="carousel-caption" :class="{ 'show': showCaptionIndex === index }">
             <h3>{{ item.title }}</h3>
-            <p>{{ item.description }}</p>
+            <p>By {{ item.artist || 'Unknown' }}</p>
           </div>
         </div>
       </div>
