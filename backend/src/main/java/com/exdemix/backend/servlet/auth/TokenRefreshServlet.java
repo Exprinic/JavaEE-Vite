@@ -1,4 +1,4 @@
-// LogoutServlet.java - 完整重构
+// TokenRefreshServlet.java - 新增令牌刷新Servlet
 package com.exdemix.backend.servlet.auth;
 
 import com.exdemix.backend.service.AuthService;
@@ -6,7 +6,7 @@ import com.exdemix.backend.service.impl.AuthServiceImpl;
 import com.exdemix.backend.util.GsonUtil;
 import com.exdemix.backend.util.SecurityUtil;
 import com.exdemix.backend.vo.ApiResponse;
-import com.exdemix.backend.vo.LogoutResponseVO;
+import com.exdemix.backend.vo.TokenRefreshResponseVO;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,13 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 
 @Slf4j
-@WebServlet("/api/auth/logout")
-public class LogoutServlet extends HttpServlet {
+@WebServlet("/api/auth/refresh")
+public class TokenRefreshServlet extends HttpServlet {
     
     private final AuthService authService;
     private final Gson gson;
     
-    public LogoutServlet() {
+    public TokenRefreshServlet() {
         this.authService = new AuthServiceImpl();
         this.gson = GsonUtil.getGson();
     }
@@ -40,55 +40,61 @@ public class LogoutServlet extends HttpServlet {
             // 1. 获取客户端信息
             String clientIp = SecurityUtil.getClientIp(request);
             
-            // 2. 获取访问令牌（从Authorization头或请求参数）
-            String accessToken = extractAccessToken(request);
+            // 2. 获取刷新令牌
+            String refreshToken = extractRefreshToken(request);
             
-            if (accessToken == null || accessToken.trim().isEmpty()) {
-                throw new com.exdemix.backend.exception.BusinessException("未提供访问令牌");
+            if (refreshToken == null || refreshToken.trim().isEmpty()) {
+                throw new com.exdemix.backend.exception.BusinessException("未提供刷新令牌");
             }
             
-            // 3. 调用服务层登出
-            authService.logout(accessToken, clientIp);
+            // 3. 调用服务层刷新令牌
+            TokenRefreshResponseVO refreshResponse = authService.refreshToken(refreshToken, clientIp);
             
             // 4. 返回成功响应
-            LogoutResponseVO logoutResponse = LogoutResponseVO.builder()
-                .message("登出成功")
-                .build();
-            
-            ApiResponse<LogoutResponseVO> apiResponse = ApiResponse.success(logoutResponse);
+            ApiResponse<TokenRefreshResponseVO> apiResponse = ApiResponse.success(refreshResponse);
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(gson.toJson(apiResponse));
             
-            log.info("Logout successful for token: {}", accessToken.substring(0, Math.min(20, accessToken.length())));
+            log.info("Token refresh successful");
             
         } catch (com.exdemix.backend.exception.BusinessException e) {
             // 业务异常
-            log.warn("Business exception during logout: {}", e.getMessage());
-            ApiResponse<String> errorResponse = ApiResponse.error(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            log.warn("Business exception during token refresh: {}", e.getMessage());
+            ApiResponse<String> errorResponse = ApiResponse.error(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write(gson.toJson(errorResponse));
             
         } catch (Exception e) {
             // 系统异常
-            log.error("System error during logout", e);
+            log.error("System error during token refresh", e);
             ApiResponse<String> errorResponse = ApiResponse.error(
                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-                "登出失败，请稍后重试"
+                "令牌刷新失败，请重新登录"
             );
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(gson.toJson(errorResponse));
         }
     }
     
-    private String extractAccessToken(HttpServletRequest request) {
+    private String extractRefreshToken(HttpServletRequest request) {
         // 从Authorization头获取
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
         
+        // 从请求体获取
+        try {
+            RefreshTokenRequest requestBody = gson.fromJson(request.getReader(), RefreshTokenRequest.class);
+            if (requestBody != null && requestBody.getRefreshToken() != null) {
+                return requestBody.getRefreshToken();
+            }
+        } catch (Exception e) {
+            // 忽略解析错误
+        }
+        
         // 从请求参数获取
-        String tokenParam = request.getParameter("token");
+        String tokenParam = request.getParameter("refresh_token");
         if (tokenParam != null && !tokenParam.trim().isEmpty()) {
             return tokenParam;
         }
@@ -109,5 +115,18 @@ public class LogoutServlet extends HttpServlet {
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Max-Age", "3600");
+    }
+    
+    // 内部类用于解析刷新令牌请求
+    private static class RefreshTokenRequest {
+        private String refreshToken;
+        
+        public String getRefreshToken() {
+            return refreshToken;
+        }
+        
+        public void setRefreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
+        }
     }
 }

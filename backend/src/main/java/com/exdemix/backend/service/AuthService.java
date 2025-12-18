@@ -1,24 +1,15 @@
+// AuthService.java (接口)
 package com.exdemix.backend.service;
 
-import com.exdemix.backend.dto.CaptchaRequestDTO;
-import com.exdemix.backend.dto.LoginRequestDTO;
-import com.exdemix.backend.dto.LogoutRequestDTO;
-import com.exdemix.backend.dto.RegisterRequestDTO;
-import com.exdemix.backend.vo.CaptchaResponseVO;
-import com.exdemix.backend.vo.LoginResponseVO;
-import com.exdemix.backend.vo.LogoutResponseVO;
-import com.exdemix.backend.vo.RegisterResponseVO;
-
-import java.io.IOException;
-import java.util.Map;
+import com.exdemix.backend.dto.*;
+import com.exdemix.backend.vo.*;
 
 public interface AuthService {
-
-    LoginResponseVO login(LoginRequestDTO loginRequest);
-
-    RegisterResponseVO register(RegisterRequestDTO registerRequest);
-
-    LogoutResponseVO logout(LogoutRequestDTO logoutRequest);
-
-    CaptchaResponseVO generateCaptcha(CaptchaRequestDTO captchaRequestDTO);
+    LoginResponseVO login(LoginRequestDTO loginRequest, String ipAddress, String userAgent) throws InterruptedException;
+    RegisterResponseVO register(RegisterRequestDTO registerRequest, String ipAddress, String userAgent);
+    void logout(String accessToken, String ipAddress);
+    void logoutAllSessions(Long userId, String ipAddress);
+    CaptchaResponseVO generateCaptcha(CaptchaRequestDTO captchaRequest, String ipAddress);
+    TokenRefreshResponseVO refreshToken(String refreshToken, String ipAddress);
+    boolean validateCaptcha(String phone, String captcha, String captchaType);
 }

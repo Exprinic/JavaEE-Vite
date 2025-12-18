@@ -2,5 +2,6 @@ package com.exdemix.backend.entity.user;
 
 public enum UserType {
     ADMIN,
-    REGULAR
+    REGULAR,
+    SUPER_ADMIN
 }

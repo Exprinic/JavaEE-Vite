@@ -12,7 +12,7 @@ public class AuthConverter {
 
     // 通用转换方法 - 支持所有User子类
     public <T extends User> LoginResponseVO toLoginVO(
-            T user, String accessToken,String refreshToken,String message) {
+            T user, String accessToken, String refreshToken, String message, LocalDateTime expiresAt) {
         if (user == null) return null;
 
         Long expireIn = 3600L;
@@ -30,7 +30,7 @@ public class AuthConverter {
                 .refreshToken(refreshToken)
                 .expiresIn(expireIn)
                 .permissions(user.getPermissions())
-                .roles(getRoleNames(user.getRoles())) // 使用新方法
+                .roles(user.getRoles()) // 使用新方法
                 .message(message)
                 .build();
     }
@@ -44,11 +44,11 @@ public class AuthConverter {
     // 快速转换List
     public <T extends User> List<LoginResponseVO> toLoginVOList(List<T> users) {
         return users.stream()
-                .map(user -> toLoginVO(user, null, null, "Login successful!"))
+                .map(user -> toLoginVO(user, null, null, "Login successful!", LocalDateTime.now().plusHours(1)))
                 .collect(Collectors.toList());
     }
 
-    public RegisterResponseVO toRegisterVO(User user, String accessToken,String refreshToken,String message) {
+    public RegisterResponseVO toRegisterVO(User user, String accessToken, String refreshToken, String message, LocalDateTime expiresAt) {
         if (user == null)
             return null;
 
@@ -68,12 +68,12 @@ public class AuthConverter {
                 .expiresIn(expireIn)
                 .message(message)
                 .permissions(user.getPermissions())
-                .roles(getRoleNames(user.getRoles()))
+                .roles(user.getRoles())
                 .registerMessage("Register successful!")
                 .build();
     }
 
-    public CaptchaResponseVO toCaptchaVO(String captcha) {
+    public CaptchaResponseVO toCaptchaVO(String captcha, LocalDateTime expireTime) {
         return CaptchaResponseVO.builder()
                 .captcha(captcha)
                 .build();

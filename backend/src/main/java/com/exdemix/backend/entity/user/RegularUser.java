@@ -1,24 +1,24 @@
+// RegularUser.java
 package com.exdemix.backend.entity.user;
 
 import java.math.BigDecimal;
 
-/**
- * 普通用户
- */
 public class RegularUser extends User {
-    private BigDecimal balance;          // 账户余额
-    private Integer uploadCount;         // 上传数量
-    private Integer purchaseCount;       // 购买数量
+    private BigDecimal balance;
 
     public RegularUser() {
-        super();
         this.userType = UserType.REGULAR;
+        this.roles.add(Role.ROLE_USER.name());
     }
 
     @Override
-    public boolean hasPermission(Permission permission) {
-        // 基于角色检查权限
-        return getRoles().stream()
-                .anyMatch(role -> role.getPermissions().contains(permission));
+    public boolean hasPermission(String permissionCode) {
+        // 检查用户特定权限
+        if (permissions.contains(permissionCode)) {
+            return true;
+        }
+
+        // 检查角色权限
+        return getAllPermissions().contains(permissionCode);
     }
 }

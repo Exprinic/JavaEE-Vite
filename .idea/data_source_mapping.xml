@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/backend/src/main/java/com/exdemix/backend/dao/impl/CaptchaDaoImpl.java" value="499eda6e-8c1a-4ba2-bee5-0d003eb6f1e8" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/java/com/exdemix/backend/dao/impl/SessionDaoImpl.java" value="499eda6e-8c1a-4ba2-bee5-0d003eb6f1e8" />
     <file url="file://$PROJECT_DIR$/backend/src/main/java/com/exdemix/backend/dao/impl/UserDaoImpl.java" value="499eda6e-8c1a-4ba2-bee5-0d003eb6f1e8" />
     <file url="file://$PROJECT_DIR$/backend/src/main/java/com/exdemix/backend/dao/impl/WallpaperDaoImpl.java" value="499eda6e-8c1a-4ba2-bee5-0d003eb6f1e8" />
     <file url="file://$PROJECT_DIR$/backend/src/main/java/com/exdemix/backend/util/MetadataAndTagImporter.java" value="499eda6e-8c1a-4ba2-bee5-0d003eb6f1e8" />

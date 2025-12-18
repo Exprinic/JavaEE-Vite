@@ -68,9 +68,7 @@ import {useUiStore} from '../stores/uiStore';
 import {useUserStore} from '../stores/userStore';
 import {storeToRefs} from 'pinia';
 
-import {useNotificationStore} from '../stores/notificationStore';
 import {getImageUrl} from "../utils/image.js";
-import {a} from "vue-router/dist/devtools-EWN81iOl.mjs";
 
 const route = useRoute();
 const router = useRouter();
@@ -458,7 +456,7 @@ onUnmounted(() => {
   color: var(--text-muted);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 940px) {
   .wallpaper-detail-container {
     padding: 2rem 1rem;
     gap: 1rem;
@@ -467,7 +465,8 @@ onUnmounted(() => {
 
   .wallpaper-detail-card {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    min-width: 500px;
+    gap: 1rem;
   }
 
   .image-container {
@@ -481,6 +480,10 @@ onUnmounted(() => {
 
   .details-container h2 {
     font-size: 2rem;
+  }
+
+  .button-group {
+    flex-direction: column;
   }
 
   .nav-button {
