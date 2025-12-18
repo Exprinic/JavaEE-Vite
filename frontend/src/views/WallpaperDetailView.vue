@@ -1,22 +1,36 @@
 <template>
   <div class="wallpaper-detail-container">
-    <button :class="{ 'invisible': !canNavigatePrevious }" @click="navigateToPrevious" class="nav-button prev-button">
+    <button 
+      v-if="hasNavigation" 
+      :class="{ 'invisible': !canNavigatePrevious }" 
+      @click="navigateToPrevious" 
+      class="nav-button prev-button">
       &lt;
     </button>
-    <div v-if="wallpaper" class="wallpaper-detail-card">
+    
+    <div v-if="currentWallpaper" class="wallpaper-detail-card">
       <div class="image-container">
-        <img :src="wallpaper.imageUrl" :alt="wallpaper.name" class="wallpaper-image-full">
+        <img 
+          :src="getImageUrl(currentWallpaper.fullUrl || currentWallpaper.mediumUrl || currentWallpaper.thumbnailUrl || '')"
+          :alt="currentWallpaper.title || 'Wallpaper'" 
+          class="wallpaper-image-full"
+          loading="lazy">
       </div>
       <div class="details-container">
-        <h2>{{ wallpaper.name }}</h2>
-        <p class="artist">by {{ wallpaper.artist }}</p>
-        <div class="tags">
-          <span v-for="tag in wallpaper.tags" :key="tag" class="tag">#{{ tag }}</span>
+        <h2>{{ currentWallpaper.title || 'Untitled' }}</h2>
+        <p class="artist">by Unknown</p>
+        <!-- 简化标签显示，避免访问不存在的属性 -->
+        <div class="tags" v-if="currentWallpaper.tags && currentWallpaper.tags.length > 0">
+          <span v-for="(tag, index) in currentWallpaper.tags" :key="index" class="tag">#{{ tag }}</span>
         </div>
-        <p class="description">{{ wallpaper.description }}</p>
+        <p class="description">{{ currentWallpaper.description || 'No description available' }}</p>
         <div class="button-group">
-          <button class="action-btn set-wallpaper-btn" @click="setAsWallpaper">
+          <button class="action-btn set-wallpaper-btn" @click="previewAsWallpaper">
             <i class="fas fa-image"></i>
+            Preview as Wallpaper
+          </button>
+          <button class="action-btn set-wallpaper-permanent-btn" @click="setAsWallpaper">
+            <i class="fas fa-save"></i>
             Set as Wallpaper
           </button>
           <button class="action-btn download-btn" @click="downloadWallpaper">
@@ -26,13 +40,21 @@
         </div>
       </div>
     </div>
+    
     <div v-else-if="loading" class="loading-spinner">
       <p>Loading...</p>
     </div>
+    
     <div v-else class="not-found">
       <p>Wallpaper not found.</p>
     </div>
-    <button :class="{ 'invisible': !canNavigateNext }" @click="navigateToNext" class="nav-button next-button">&gt;
+    
+    <button 
+      v-if="hasNavigation" 
+      :class="{ 'invisible': !canNavigateNext }" 
+      @click="navigateToNext" 
+      class="nav-button next-button">
+      >
     </button>
   </div>
 </template>
@@ -48,6 +70,7 @@ import {storeToRefs} from 'pinia';
 
 import {useNotificationStore} from '../stores/notificationStore';
 import {getImageUrl} from "../utils/image.js";
+import {a} from "vue-router/dist/devtools-EWN81iOl.mjs";
 
 const route = useRoute();
 const router = useRouter();
@@ -55,108 +78,213 @@ const authStore = useAuthStore();
 const uiStore = useUiStore();
 const userStore = useUserStore();
 const wallpaperStore = useWallpaperStore();
-const notificationStore = useNotificationStore();
 
-const {wallpaper, loading, wallpapers} = storeToRefs(wallpaperStore);
-const {isAuthenticated} = storeToRefs(authStore);
+// 不再使用storeToRefs，而是直接使用store的状态
+const { loading } = storeToRefs(wallpaperStore);
+const { isAuthenticated } = storeToRefs(authStore);
+
+// 控制是否显示导航按钮
+const hasNavigation = computed(() => {
+  return wallpaperStore.allWallpapers && wallpaperStore.allWallpapers.length > 1;
+});
+
+// 创建本地响应式状态来存储当前壁纸
+const currentWallpaper = computed(() => {
+  // 查找当前壁纸，如果找不到则返回null
+  const wallpapers = wallpaperStore.allWallpapers;
+  const id = route.params.id;
+  
+  if (!id || !wallpapers) return null;
+  
+  // 查找具有匹配ID的壁纸
+  const wallpaper = wallpapers.find(w => w && w.id == id);
+  return wallpaper || null;
+});
 
 const currentWallpaperIndex = computed(() => {
-  if (!wallpaper.value || !wallpapers.value) return -1;
-  return wallpapers.value.findIndex(w => w.id === wallpaper.value.id);
+  if (!currentWallpaper.value || !wallpaperStore.allWallpapers) return -1;
+  return wallpaperStore.allWallpapers.findIndex(w => w && w.id === currentWallpaper.value.id);
 });
 
 const canNavigatePrevious = computed(() => {
-  return currentWallpaperIndex.value > 0;
+  return hasNavigation.value && currentWallpaperIndex.value > 0;
 });
 
 const canNavigateNext = computed(() => {
-  return wallpapers.value && currentWallpaperIndex.value < wallpapers.value.length - 1;
+  return hasNavigation.value && 
+         wallpaperStore.allWallpapers && 
+         currentWallpaper.value && 
+         currentWallpaperIndex.value < wallpaperStore.allWallpapers.length - 1;
 });
 
 const navigateToNext = () => {
   if (canNavigateNext.value) {
-    const nextWallpaperId = wallpapers.value[currentWallpaperIndex.value + 1].id;
+    const nextWallpaperId = wallpaperStore.allWallpapers[currentWallpaperIndex.value + 1].id;
     router.push({name: 'wallpaper-detail', params: {id: nextWallpaperId}});
   }
 };
 
 const navigateToPrevious = () => {
   if (canNavigatePrevious.value) {
-    const prevWallpaperId = wallpapers.value[currentWallpaperIndex.value - 1].id;
+    const prevWallpaperId = wallpaperStore.allWallpapers[currentWallpaperIndex.value - 1].id;
     router.push({name: 'wallpaper-detail', params: {id: prevWallpaperId}});
   }
 };
 
+// 预览壁纸为背景（临时设置，不持久化，无需登录）
+const previewAsWallpaper = async () => {
+  try {
+    // 使用适当的图像URL预览壁纸
+    const imageUrl = currentWallpaper.value.fullUrl || 
+                     currentWallpaper.value.mediumUrl || 
+                     currentWallpaper.value.thumbnailUrl || 
+                     '';
+                     
+    // 设置为临时背景（预览模式，不持久化）
+    wallpaperStore.setBackgroundPreview(getImageUrl(imageUrl));
+    
+    // 创建临时通知
+    const { useNotificationStore } = await import('../stores/notificationStore.js');
+    const tempNotificationStore = useNotificationStore();
+    tempNotificationStore.addNotification({ 
+      message: 'Previewing wallpaper! The background will reset when you leave this page.', 
+      type: 'success',
+      duration: 3000 
+    });
+  } catch (error) {
+    // 创建临时通知
+    const { useNotificationStore } = await import('../stores/notificationStore.js');
+    const tempNotificationStore = useNotificationStore();
+    tempNotificationStore.addNotification({ 
+      message: 'Failed to preview wallpaper.', 
+      type: 'error',
+      duration: 3000 
+    });
+  }
+};
+
+// 永久设置为壁纸背景（持久化，需要登录）
 const setAsWallpaper = async () => {
   if (!isAuthenticated.value) {
-    notificationStore.addNotification({ message: 'Please log in first', type: 'info' });
+    // 创建临时通知
+    const { useNotificationStore } = await import('../stores/notificationStore.js');
+    const tempNotificationStore = useNotificationStore();
+    tempNotificationStore.addNotification({ 
+      message: 'Please log in first', 
+      type: 'info',
+      duration: 3000 
+    });
     return;
   }
 
   try {
-    await wallpaperStore.setActiveWallpaper(wallpaper.value.imageUrl);
-    wallpaperWasSet = true; // Mark that the wallpaper was set
-    notificationStore.addNotification({ message: 'Wallpaper set successfully!', type: 'success' });
+    // 使用适当的图像URL设置壁纸
+    const imageUrl = currentWallpaper.value.fullUrl || 
+                     currentWallpaper.value.mediumUrl || 
+                     currentWallpaper.value.thumbnailUrl || 
+                     '';
+                     
+    // 永久设置壁纸（持久化）
+    await wallpaperStore.setActiveWallpaper(getImageUrl(imageUrl));
+    
+    // 创建临时通知
+    const { useNotificationStore } = await import('../stores/notificationStore.js');
+    const tempNotificationStore = useNotificationStore();
+    tempNotificationStore.addNotification({ 
+      message: 'Wallpaper set successfully! This will be your background next time you visit.', 
+      type: 'success',
+      duration: 3000
+    });
   } catch (error) {
-    notificationStore.addNotification({ message: 'Failed to set wallpaper.', type: 'error' });
+    // 创建临时通知
+    const { useNotificationStore } = await import('../stores/notificationStore.js');
+    const tempNotificationStore = useNotificationStore();
+    tempNotificationStore.addNotification({ 
+      message: 'Failed to set wallpaper.', 
+      type: 'error',
+      duration: 3000
+    });
   }
 };
 
-const downloadWallpaper = () => {
+const downloadWallpaper = async () => {
   if (!isAuthenticated.value) {
-    notificationStore.addNotification({ message: 'Please log in first', type: 'info' });
+    // 创建临时通知
+    const { useNotificationStore } = await import('../stores/notificationStore.js');
+    const tempNotificationStore = useNotificationStore();
+    tempNotificationStore.addNotification({ 
+      message: 'Please log in first', 
+      type: 'info',
+      duration: 3000 
+    });
     return;
   }
 
-  if (wallpaper.value) {
+  if (currentWallpaper.value) {
     try {
       const link = document.createElement('a');
-      link.href = wallpaper.value.imageUrl;
-      link.download = `wallpaper-${wallpaper.value.id}.jpg`;
+      // 使用适当的图像URL下载壁纸
+      const imageUrl = currentWallpaper.value.fullUrl || 
+                       currentWallpaper.value.mediumUrl || 
+                       currentWallpaper.value.thumbnailUrl || 
+                       '';
+                       
+      link.href = getImageUrl(imageUrl);
+      link.download = `wallpaper-${currentWallpaper.value.id}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      notificationStore.addNotification({ message: 'Download started!', type: 'success' });
+      
+      // 创建临时通知
+      const { useNotificationStore } = await import('../stores/notificationStore.js');
+      const tempNotificationStore = useNotificationStore();
+      tempNotificationStore.addNotification({ 
+        message: 'Download started!', 
+        type: 'success',
+        duration: 3000 
+      });
     } catch (error) {
       console.error('Download failed:', error);
-      notificationStore.addNotification({ message: 'Download failed', type: 'error' });
+      
+      // 创建临时通知
+      const { useNotificationStore } = await import('../stores/notificationStore.js');
+      const tempNotificationStore = useNotificationStore();
+      tempNotificationStore.addNotification({ 
+        message: 'Download failed', 
+        type: 'error',
+        duration: 3000 
+      });
     }
   }
 };
 
-let wallpaperWasSet = false; // Flag to track if the user set the wallpaper
-
+// 页面加载时的处理
 const fetchData = async () => {
   const id = route.params.id;
-  await wallpaperStore.fetchWallpaper(id);
-  if (wallpaper.value && wallpaper.value.imageUrl) {
-    // For preview, directly call setBackground to avoid persistence
-    wallpaperStore.setBackground(getImageUrl(wallpaper.value.imageUrl));
+  if (id) {
+    try {
+      // 尝试从现有列表中查找壁纸，如果找不到则从服务器获取
+      await wallpaperStore.fetchWallpaper(id, false); // 不强制刷新
+    } catch (error) {
+      console.error('Failed to fetch wallpaper:', error);
+    }
   }
 };
 
 onMounted(() => {
-  wallpaperWasSet = false; // Reset flag on mount
   fetchData();
 });
 
 watch(() => route.params.id, (newId, oldId) => {
   if (newId && newId !== oldId) {
-    wallpaperWasSet = false;
     fetchData();
   }
 });
 
+// 在组件卸载时恢复活动壁纸
 onUnmounted(() => {
-  // Revert to the active wallpaper ONLY if a new one wasn't permanently set on this page
-  if (!wallpaperWasSet) {
-    if (wallpaperStore.activeWallpaperUrl) {
-      wallpaperStore.setBackground(wallpaperStore.activeWallpaperUrl);
-    } else {
-      // If no active wallpaper is set (e.g., logged-out user), revert to default
-      wallpaperStore.setDefaultBackground();
-    }
-  }
+  // 恢复活动壁纸，清除临时预览
+  wallpaperStore.restoreActiveWallpaper();
 });
 </script>
 
@@ -310,6 +438,8 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 10;
+  position: sticky;
+  top: 50%;
 }
 
 .nav-button:hover {

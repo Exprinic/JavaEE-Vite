@@ -58,7 +58,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useWallpaperStore } from '@/stores/wallpaperStore.js';
 
 const wallpaperStore = useWallpaperStore();
-const { fetchCarouselWallpapers } = wallpaperStore;
+const { fetchCarouselWallpapers, carouselWallpapers } = wallpaperStore;
 
 const carouselRef = ref(null);
 const currentIndex = ref(0);
@@ -125,15 +125,18 @@ watch(displayedItems, (newVal) => {
   startAutoPlay();
 });
 
+// 监听轮播图壁纸的变化
+watch(carouselWallpapers, (newVal) => {
+  displayedItems.value = Array.isArray(newVal) ? newVal : [];
+}, { immediate: true });
+
 onMounted(async () => {
   try {
-    // Fetch carousel wallpapers from the store
-    console.log('Mounting carousel component...');
-    const wallpapers = await fetchCarouselWallpapers();
-    console.log('Wallpapers fetched in Carousel.vue:', wallpapers);
-    displayedItems.value = Array.isArray(wallpapers) ? wallpapers : [];
-    console.log('Loaded carousel items:', displayedItems.value.length);
-    console.log('Display items:', displayedItems.value);
+    // 使用缓存机制获取轮播图壁纸
+    const wallpapers = await fetchCarouselWallpapers(false); // 不强制刷新
+    if (!displayedItems.value.length && Array.isArray(wallpapers)) {
+      displayedItems.value = wallpapers;
+    }
     startAutoPlay();
   } catch (error) {
     console.error('Failed to load carousel wallpapers:', error);

@@ -15,7 +15,10 @@
       />
       <div v-if="loading" class="loading">Loading wallpapers...</div>
       <div v-else-if="error" class="error">Error: {{ error }}</div>
-      <WallpaperGrid v-else :wallpapers="wallpapers"/>
+      <div v-else-if="!wallpapers || !Array.isArray(wallpapers) || wallpapers.length === 0" class="no-results">
+        <p>No wallpapers found. Try a different filter or search term.</p>
+      </div>
+      <WallpaperGrid v-else :wallpapers="wallpapers || []"/>
     </div>
   </div>
 </template>
@@ -97,7 +100,7 @@ onMounted(() => {
   if (query) {
     searchWallpapers(query, selectedCategoryValue.value);
   } else {
-    init();
+    init(); // 这里会使用缓存机制
   }
 });
 </script>

@@ -1,10 +1,16 @@
 <template>
   <div class="wallpaper-card">
-    <img :src="getImageUrl(wallpaper.imageUrl)" :alt="wallpaper.name" class="wallpaper-image" @click="openDetailView"/>
+    <img 
+      :src="getImageUrl(wallpaper.thumbnailUrl)" 
+      :alt="wallpaper.title" 
+      class="wallpaper-image" 
+      @click="openDetailView"
+      loading="lazy"
+    />
     <div class="overlay">
       <div class="wallpaper-info">
-        <h3 class="wallpaper-name">{{ wallpaper.name }}</h3>
-        <p class="wallpaper-artist">by {{ wallpaper.artist }}</p>
+        <h3 class="wallpaper-name">{{ wallpaper.title }}</h3>
+        <p class="wallpaper-artist">by Unknown</p>
       </div>
       <div class="card-actions">
         <button class="action-button" @click.stop="setAsWallpaper">
@@ -30,14 +36,7 @@ import {storeToRefs} from "pinia";
 const props = defineProps({
   wallpaper: {
     type: Object,
-    required: true,
-    default: () => ({
-      id: 0,
-      name: '',
-      imageUrl: '',
-      artist: '',
-      tags: []
-    })
+    required: true
   }
 })
 
@@ -50,16 +49,21 @@ const uiStore = useUiStore();
 const {isAuthenticated} = storeToRefs(authStore);
 
 const openDetailView = () => {
-  router.push({name: 'wallpaper-detail', params: {id: props.wallpaper.id}})
+  // 确保id存在再跳转
+  if (props.wallpaper && props.wallpaper.id) {
+    router.push({name: 'wallpaper-detail', params: {id: props.wallpaper.id}})
+  }
 }
 
 const downloadWallpaper = () => {
   if (!isAuthenticated.value) {
     notificationStore.addNotification({message: 'Please log in to download the image', type: 'info'});
-  } else {
+  } else if (props.wallpaper) {
     const link = document.createElement('a');
-    link.href = getImageUrl(props.wallpaper.imageUrl);
-    link.download = props.wallpaper.name || 'wallpaper';
+    const imageUrl = props.wallpaper.fullUrl || props.wallpaper.mediumUrl || props.wallpaper.thumbnailUrl;
+    const fileName = props.wallpaper.title || 'wallpaper';
+    link.href = getImageUrl(imageUrl);
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -70,9 +74,11 @@ const downloadWallpaper = () => {
 const setAsWallpaper = async () => {
   if (!isAuthenticated.value) {
     notificationStore.addNotification({message: 'Please log in to set the wallpaper', type: 'info'});
-  } else {
+  } else if (props.wallpaper) {
     try {
-      await wallpaperStore.setActiveWallpaper(props.wallpaper.imageUrl);
+      // 使用适当的图像URL设置壁纸
+      const imageUrl = props.wallpaper.fullUrl || props.wallpaper.mediumUrl || props.wallpaper.thumbnailUrl;
+      await wallpaperStore.setActiveWallpaper(getImageUrl(imageUrl));
       notificationStore.addNotification({message: 'Wallpaper set successfully!', type: 'success'});
     } catch (error) {
       notificationStore.addNotification({message: 'Failed to set wallpaper, please try again later', type: 'error'});

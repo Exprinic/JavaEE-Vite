@@ -56,7 +56,7 @@ public class WallpaperDaoImpl implements WallpaperDao {
         String sql = "SELECT DISTINCT w.* FROM wallpapers w " +
                      "LEFT JOIN wallpaper_tags wt ON w.id = wt.wallpaper_id " +
                      "LEFT JOIN tags t ON wt.tag_id = t.id " +
-                     "WHERE (w.title LIKE ? OR w.description LIKE ? OR t.name LIKE ?) " +
+                     "WHERE (w.title LIKE ? OR w.description LIKE ? OR t.name LIKE ? OR t.slug LIKE ?) " +
                      "AND w.status = 'APPROVED' " +
                      "ORDER BY w.created_at DESC";
         
@@ -66,6 +66,7 @@ public class WallpaperDaoImpl implements WallpaperDao {
             stmt.setString(1, searchKeyword);
             stmt.setString(2, searchKeyword);
             stmt.setString(3, searchKeyword);
+            stmt.setString(4, searchKeyword);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -85,12 +86,13 @@ public class WallpaperDaoImpl implements WallpaperDao {
         String sql = "SELECT DISTINCT w.* FROM wallpapers w " +
                      "JOIN wallpaper_tags wt ON w.id = wt.wallpaper_id " +
                      "JOIN tags t ON wt.tag_id = t.id " +
-                     "WHERE t.name = ? AND t.type = 'CATEGORY' AND w.status = 'APPROVED' " +
+                     "WHERE (t.name = ? OR t.slug = ?) AND t.type = 'CATEGORY' AND w.status = 'APPROVED' " +
                      "ORDER BY w.created_at DESC";
         
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, category);
+            stmt.setString(2, category);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -109,12 +111,13 @@ public class WallpaperDaoImpl implements WallpaperDao {
         String sql = "SELECT DISTINCT w.* FROM wallpapers w " +
                      "JOIN wallpaper_tags wt ON w.id = wt.wallpaper_id " +
                      "JOIN tags t ON wt.tag_id = t.id " +
-                     "WHERE t.name = ? AND t.type = 'TAG' AND w.status = 'APPROVED' " +
+                     "WHERE (t.name = ? OR t.slug = ?) AND w.status = 'APPROVED' " +
                      "ORDER BY w.created_at DESC";
         
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, tag);
+            stmt.setString(2, tag);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -133,9 +136,9 @@ public class WallpaperDaoImpl implements WallpaperDao {
         String sql = "SELECT DISTINCT w.* FROM wallpapers w " +
                      "LEFT JOIN wallpaper_tags wt ON w.id = wt.wallpaper_id " +
                      "LEFT JOIN tags t ON wt.tag_id = t.id " +
-                     "WHERE (w.title LIKE ? OR w.description LIKE ? OR t.name LIKE ?) " +
+                     "WHERE (w.title LIKE ? OR w.description LIKE ? OR t.name LIKE ? OR t.slug LIKE ?) " +
                      "AND EXISTS (SELECT 1 FROM wallpaper_tags wt2 JOIN tags t2 ON wt2.tag_id = t2.id " +
-                     "WHERE wt2.wallpaper_id = w.id AND t2.name = ? AND t2.type = 'CATEGORY') " +
+                     "WHERE wt2.wallpaper_id = w.id AND (t2.name = ? OR t2.slug = ?) AND t2.type = 'CATEGORY') " +
                      "AND w.status = 'APPROVED' " +
                      "ORDER BY w.created_at DESC";
         
@@ -145,7 +148,9 @@ public class WallpaperDaoImpl implements WallpaperDao {
             stmt.setString(1, searchKeyword);
             stmt.setString(2, searchKeyword);
             stmt.setString(3, searchKeyword);
-            stmt.setString(4, category);
+            stmt.setString(4, searchKeyword);
+            stmt.setString(5, category);
+            stmt.setString(6, category);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 @Slf4j
 public class WallpaperServiceImpl implements WallpaperService {
     private final WallpaperDaoImpl wallpaperDao = new WallpaperDaoImpl(); // 使用具体实现类以便调用新增方法
@@ -111,6 +112,16 @@ public class WallpaperServiceImpl implements WallpaperService {
         } catch (Exception e) {
             log.error("Failed to fetch carousel wallpapers: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to fetch carousel wallpapers: " + e.getMessage(), e);
+        }
+    }
+    
+    // 添加根据ID获取壁纸详情的方法
+    public Optional<Wallpaper> getWallpaperById(Long id) {
+        try {
+            return wallpaperDao.findById(id);
+        } catch (Exception e) {
+            log.error("Failed to fetch wallpaper by id: {}", id, e);
+            throw new RuntimeException("Failed to fetch wallpaper by id: " + id, e);
         }
     }
 }

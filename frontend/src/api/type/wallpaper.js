@@ -43,6 +43,16 @@ const wallpaperApi = {
         }
     },
 
+    // 获取壁纸详情
+    async getWallpaperDetail(id) {
+        try {
+            return await apiClient.get(`/wallpaper/detail?id=${id}`);
+        } catch (error) {
+            console.error('API request error:', error);
+            throw error;
+        }
+    },
+
     // 上传壁纸
     async uploadWallpaper(formData, onUploadProgress) {
         try {

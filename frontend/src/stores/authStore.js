@@ -1,127 +1,131 @@
-import {defineStore} from 'pinia';
-import {ref} from 'vue';
-import router from '../router'; // 直接导入路由实例
-import {
-    authApi
-} from '../api/type/auth';
-import {useUserStore} from './userStore';
-import {useUiStore} from "./uiStore";
-import {useNotificationStore} from "./notificationStore";
-import {useWallpaperStore} from './wallpaperStore'; // Import wallpaper store
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { authApi } from '../api/type/auth'
+import { useNotificationStore } from "@/stores/notificationStore.js";
+import { useWallpaperStore } from './wallpaperStore'; // 导入壁纸存储
 
 export const useAuthStore = defineStore('auth', () => {
-    const error = ref(null);
-    const captcha = ref('');
-    const isAuthenticated = ref(false);
+  const isAuthenticated = ref(!!localStorage.getItem('token'))
+  const user = ref(JSON.parse(localStorage.getItem('user') || 'null'))
+  const loading = ref(false)
+  const error = ref(null)
 
-    const userStore = useUserStore();
-
-    async function getCaptcha(credentials) {
+  async function login(credentials) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await authApi.login(credentials)
+      
+      if (response.token && response.user) {
+        localStorage.setItem('token', response.token)
+        localStorage.setItem('user', JSON.stringify(response.user))
+        
+        isAuthenticated.value = true
+        user.value = response.user
+        
         const notificationStore = useNotificationStore();
-        try {
-            const response = await authApi.fetchCaptcha(credentials);
-            captcha.value = response.captcha;
-
-            notificationStore.addNotification({message: captcha.value, type: 'success'});
-        } catch (e) {
-            console.error('Failed to fetch verify code:', e);
-            notificationStore.addNotification({message: captcha.value || '获取验证码失败', type: 'error'});
-        }
+        notificationStore.addNotification({ 
+          message: `Welcome back, ${response.user.username}!`, 
+          type: 'success' 
+        })
+        
+        return response
+      } else {
+        throw new Error('Invalid response from server')
+      }
+    } catch (err) {
+      console.error('Login failed:', err)
+      error.value = err.message || 'Login failed'
+      
+      const notificationStore = useNotificationStore();
+      notificationStore.addNotification({ 
+        message: error.value, 
+        type: 'error' 
+      })
+      
+      throw err
+    } finally {
+      loading.value = false
     }
+  }
 
-    async function login(credentials) {
-        const uiStore = useUiStore();
-        const notificationStore = useNotificationStore();
-        // --- API Login Logic ---
-        try {
-            const userData = await authApi.login(credentials);
-            userStore.setUser(userData);
-            isAuthenticated.value = true;
-            uiStore.hideDialogs();
-            notificationStore.addNotification({message: userData.message, type: 'success'});
-            await router.push('/');
-        } catch (e) {
-            console.error('Login error:', e); // 添加错误日志
-            // 错误消息现在从统一响应格式中获取
-            error.value = e.response?.data?.message || '登录失败，请稍后再试';
-            notificationStore.addNotification({message: error.value, type: 'error'});
-            throw e;
-        }
+  async function register(userData) {
+    loading.value = true
+    error.value = null
+    
+    try {
+      const response = await authApi.register(userData)
+      
+      const notificationStore = useNotificationStore();
+      notificationStore.addNotification({ 
+        message: 'Registration successful! Please log in.', 
+        type: 'success' 
+      })
+      
+      return response
+    } catch (err) {
+      console.error('Registration failed:', err)
+      error.value = err.message || 'Registration failed'
+      
+      const notificationStore = useNotificationStore();
+      notificationStore.addNotification({ 
+        message: error.value, 
+        type: 'error' 
+      })
+      
+      throw err
+    } finally {
+      loading.value = false
     }
+  }
 
-    async function register(credentials) {
-        const uiStore = useUiStore();
-        const notificationStore = useNotificationStore();
+  function logout() {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('active_wallpaper') // 清除活动壁纸
+    
+    isAuthenticated.value = false
+    user.value = null
+    
+    // 清除壁纸存储中的缓存数据
+    const wallpaperStore = useWallpaperStore();
+    wallpaperStore.clearCacheOnLogout();
+    
+    const notificationStore = useNotificationStore();
+    notificationStore.addNotification({ 
+      message: 'You have been logged out successfully.', 
+      type: 'info' 
+    })
+  }
 
-        // --- API Registration Logic ---
-        try {
-            // 确保所有必需的字段都存在，包括 inviteCode
-            const registerData = {
-                username: credentials.username,
-                phone: credentials.phone,
-                password: credentials.password,
-                captcha: credentials.captcha,
-                inviteCode: credentials.inviteCode || '' // 添加 inviteCode 字段
-            };
-            
-            const userData = await authApi.register(registerData);
-            userStore.setUser(userData);
-            isAuthenticated.value = true;
-            uiStore.hideDialogs();
-            notificationStore.addNotification({message: userData.message, type: 'success'});
-            await router.push('/login');
-        } catch (e) {
-            // 提供更具体的错误消息
-            const errorMessage = e.response?.data?.message || '注册失败，请检查输入信息或稍后再试';
-            error.value = errorMessage;
-            notificationStore.addNotification({message: errorMessage, type: 'error'});
-            throw e;
-        }
+  function checkAuth() {
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    
+    if (token && userData) {
+      isAuthenticated.value = true
+      try {
+        user.value = JSON.parse(userData)
+      } catch (e) {
+        console.error('Failed to parse user data:', e)
+        logout() // 如果用户数据损坏，则登出
+      }
+    } else {
+      isAuthenticated.value = false
+      user.value = null
     }
+  }
 
-    async function logout(credentials) {
-        const uiStore = useUiStore();
-        const notificationStore = useNotificationStore();
-        const message = ref( '');
-        try {
-            const response = await authApi.logOut(credentials);
-            userStore.clearUser();
-            isAuthenticated.value = false;
-            message.value = response.message || '登出成功！';
-
-            uiStore.hideDialogs();
-            notificationStore.addNotification({message: message.value, type: 'success'});
-            await router.push('/');
-        } catch (e) {
-            console.error('Logout error:', e);
-            notificationStore.addNotification({message: message.value || '登出失败，请稍后再试', type: 'error'});
-        }
-    }
-
-    function checkAuth() {
-        const notificationStore = useNotificationStore();
-        const wallpaperStore = useWallpaperStore();
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            const user = JSON.parse(storedUser);
-            userStore.setUser(user);
-            isAuthenticated.value = true;
-
-            const userWallpaper = localStorage.getItem(`user-wallpaper-${user.id}`);
-            if (userWallpaper) {
-                // wallpaperStore.loadUserWallpaper(userWallpaper);
-            }
-        }
-    }
-
-    return {
-        error,
-        captcha: captcha,
-        isAuthenticated,
-        getCaptcha,
-        login,
-        register,
-        logout,
-        checkAuth
-    };
-});
+  return {
+    isAuthenticated,
+    user,
+    loading,
+    error,
+    
+    login,
+    register,
+    logout,
+    checkAuth
+  }
+})

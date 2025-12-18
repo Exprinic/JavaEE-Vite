@@ -53,6 +53,7 @@ onMounted(() => {
   height: 100%;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   z-index: -1;
   transition: opacity 0.5s ease-in-out;
 }

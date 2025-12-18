@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface WallpaperService {
     void upload();
@@ -20,4 +21,7 @@ public interface WallpaperService {
     
     // 添加获取轮播图壁纸的方法
     List<Wallpaper> getCarouselWallpapers();
+    
+    // 添加根据ID获取壁纸详情的方法
+    Optional<Wallpaper> getWallpaperById(Long id);
 }

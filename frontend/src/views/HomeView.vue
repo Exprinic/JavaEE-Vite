@@ -12,11 +12,18 @@
 <script setup>
 import SearchBar from '../components/SearchBar.vue';
 import Carousel from '../components/wallpaper/Carousel.vue';
-import {ref} from 'vue';
+import {ref, onMounted} from 'vue';
 import {useRouter} from 'vue-router';
+import { useWallpaperStore } from '../stores/wallpaperStore'; // 导入壁纸存储
 
 const router = useRouter();
 const searchQuery = ref('');
+
+// 在主页加载时初始化壁纸存储（使用缓存）
+const wallpaperStore = useWallpaperStore();
+onMounted(() => {
+  wallpaperStore.init(); // 初始化壁纸存储，会使用缓存机制
+});
 
 const search = (query) => {
   if (query && query.trim()) {

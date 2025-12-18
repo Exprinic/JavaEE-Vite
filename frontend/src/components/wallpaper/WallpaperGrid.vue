@@ -1,7 +1,10 @@
 <template>
   <div class="wallpaper-grid-container">
-    <div v-if="wallpapers.length > 0" class="wallpaper-grid">
-      <WallpaperCard v-for="wallpaper in wallpapers" :key="wallpaper.id" :wallpaper="wallpaper" />
+    <div v-if="wallpapers && Array.isArray(wallpapers) && wallpapers.length > 0" class="wallpaper-grid">
+      <WallpaperCard 
+        v-for="(wallpaper, index) in wallpapers" 
+        :key="wallpaper.id || index" 
+        :wallpaper="wallpaper" />
     </div>
     <div v-else class="no-results">
       <p>No wallpapers found. Try a different filter or search term.</p>
@@ -10,13 +13,13 @@
 </template>
 
 <script setup>
-
 import WallpaperCard from './WallpaperCard.vue';
 
 defineProps({
   wallpapers: {
     type: Array,
     required: true,
+    default: () => []
   },
 });
 </script>
